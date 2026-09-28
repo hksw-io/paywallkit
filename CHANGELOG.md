@@ -14,7 +14,7 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ### Changed
 
-- **Breaking for conformers that were not already Sendable:** `PaywallService` now refines `Sendable`. `@MainActor` classes and structs holding Sendable values already are.
+- `PaywallService` refines `Sendable`. `@MainActor` classes and structs holding Sendable values already conform; 1.0.0 was public for under an hour with no outside conformers, so this ships as a patch.
 
 ## [1.0.0] - 2026-09-28
 
