@@ -201,12 +201,10 @@ final class PaywallModel {
 
     private func observeEntitlement() {
         self.entitlementObservation?.cancel()
-        let entitlements = Observations { @MainActor [weak self] in
-            self?.service.entitlement ?? .unknown
-        }
-        var sawFree = self.service.entitlement == .free
+        let service = self.service
+        var sawFree = service.entitlement == .free
         self.entitlementObservation = Task { [weak self] in
-            for await entitlement in entitlements {
+            for await entitlement in Observations({ service.entitlement }) {
                 guard !Task.isCancelled, let self else { return }
                 switch entitlement {
                 case .free:

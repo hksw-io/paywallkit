@@ -6,6 +6,16 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-09-28
+
+### Fixed
+
+- Builds with Xcode 26.6: the entitlement observation no longer crashes the Swift 6.3 compiler.
+
+### Changed
+
+- **Breaking for conformers that were not already Sendable:** `PaywallService` now refines `Sendable`. `@MainActor` classes and structs holding Sendable values already are.
+
 ## [1.0.0] - 2026-09-28
 
 ### Added

@@ -7,7 +7,7 @@ import Foundation
 /// approval that lands while it is open (Ask to Buy, another device) and to close itself when access
 /// turns out to be active already.
 @MainActor
-public protocol PaywallService {
+public protocol PaywallService: Sendable {
     var entitlement: PaywallEntitlement { get }
     var products: [PaywallProduct] { get }
     var canMakePayments: Bool { get }
