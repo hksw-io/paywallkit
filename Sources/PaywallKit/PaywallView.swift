@@ -71,6 +71,7 @@ public struct PaywallView: View {
             .onGeometryChange(for: CGFloat.self) { proxy in
                 proxy.size.height
             } action: { height in
+                guard PaywallMetrics.sheetHeightChanged(from: self.sheetHeight, to: height) else { return }
                 self.sheetHeight = height
             }
             .background {

@@ -22,6 +22,7 @@ enum PaywallMetrics {
 
     static let compactHeight: CGFloat = 667
     static let spaciousHeight: CGFloat = 956
+    static let sheetHeightTolerance: CGFloat = 1
 
     static var heroTopPadding: CGFloat {
         #if os(macOS)
@@ -93,6 +94,12 @@ enum PaywallMetrics {
         #else
             return height < 700 ? .title3.weight(.bold) : .title2.weight(.bold)
         #endif
+    }
+
+    /// The measured height feeds the metrics that size the content, so a sub-point
+    /// change must not be stored: floating-point noise would re-measure forever.
+    static func sheetHeightChanged(from current: CGFloat, to measured: CGFloat) -> Bool {
+        abs(measured - current) > self.sheetHeightTolerance
     }
 
     static func scaled(_ lower: CGFloat, _ upper: CGFloat, for height: CGFloat) -> CGFloat {
