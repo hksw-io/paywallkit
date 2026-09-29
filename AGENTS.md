@@ -18,13 +18,13 @@ Instructions for agents working in this repository. RFC 2119 keywords apply.
 
 ## Localization
 
-- All copy lives in `Sources/PaywallKit/Resources/Localizable.xcstrings` (en, sv) and MUST be looked up through `localized(_:)`, which uses `bundle: .module`. A bare `Text("key")` or `LocalizedStringKey` resolves against the app's bundle and shows the raw key.
-- Every entry keeps `extractionState: manual`.
+- The kit ships no copy. Every user-visible or spoken string MUST come from a `PaywallString` case through the app's lookup (`@Environment(\.paywallStrings)` in views; `PaywallString` values in the model). Never write a literal in `Text`, a label, a hint or an alert.
+- New copy is a new `PaywallString` case, which is a breaking change: apps switch over the enum exhaustively. Update the README's reference `switch` with it.
 
 ## Testing and Verification
 
 - Add or update Swift Testing coverage for every behavior change. `PaywallModelTests` drives the model with an `@Observable` fake service and a recorded `sleep`.
-- Tests MUST compare copy through `localized(_:)`, never English literals: toolchains before Swift 6.4 do not compile the catalog under `swift test`.
+- Tests MUST compare `PaywallString` values, or pass `{ "\($0)" }` as the lookup, never English literals.
 - Run `swift test` and `xcodebuild -scheme PaywallKit -destination 'generic/platform=iOS Simulator' build` before calling work complete, and `git diff --check` before committing.
 - CI (`.github/workflows/ci.yml`) runs macOS and iOS Simulator tests on Xcode 26.6 and 27.0. Keep it green.
 

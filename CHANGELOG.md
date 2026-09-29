@@ -6,6 +6,14 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `PaywallView` requires `strings:`, a lookup that returns the app's text for each `PaywallString` case. Apps name their own subscription instead of "Premium" and localize the paywall in their own catalog. The README carries the previous English copy as a starting point.
+
+### Removed
+
+- The bundled English and Swedish string catalog. The kit contains no copy.
+
 ## [1.0.1] - 2026-09-28
 
 ### Fixed

@@ -42,6 +42,7 @@ import SwiftUI
         highlightedBenefitID: "themes",
         thanksLines: [Text("Thank you for supporting MyApp.")],
         privacyPolicy: URL(string: "https://example.com/privacy")!,
+        strings: paywallText,
         onDismiss: { showsPaywall = false })
 }
 ```
@@ -53,6 +54,70 @@ pass `wallpaperSymbols` for a faint tiled backdrop, and forward your app's hapti
 
 `onDismiss` runs for both a cancel and a completed purchase. Read your own entitlement afterwards to
 tell them apart.
+
+### The copy
+
+The kit ships no strings. `strings` returns your app's text for every `PaywallString`, so the
+paywall names your subscription and localizes with the rest of your app. An exhaustive `switch`
+makes the compiler flag any case you miss. This English copy is a starting point:
+
+```swift
+import PaywallKit
+
+@Sendable
+func paywallText(_ string: PaywallString) -> String {
+    switch string {
+    case .benefitsHeader: String(localized: "Everything in Premium")
+    case .highlightedBenefit: String(localized: "the feature you tried to use")
+    case .plan(.monthly): String(localized: "Monthly")
+    case .plan(.yearly): String(localized: "Yearly")
+    case .plan(.lifetime): String(localized: "Lifetime")
+    case .billing(.monthly): String(localized: "Billed monthly")
+    case .billing(.yearly): String(localized: "Billed yearly")
+    case .billing(.lifetime): String(localized: "One-time purchase")
+    case let .savePercent(percent): String(localized: "Save \(percent)%")
+    case let .perMonth(price): String(localized: "\(price)/mo")
+    case .subscribe: String(localized: "Subscribe")
+    case .startTrial: String(localized: "Start Free Trial")
+    case .purchase: String(localized: "Purchase")
+    case .subscriptionReassurance: String(localized: "Cancel anytime.")
+    case .lifetimeReassurance: String(localized: "Yours forever after one purchase.")
+    case let .monthlyTrialDisclosure(trial, price):
+        String(localized: "\(trial), then \(price) is charged automatically each month until canceled.")
+    case let .yearlyTrialDisclosure(trial, price):
+        String(localized: "\(trial), then \(price) is charged automatically each year until canceled.")
+    case .purchasing: String(localized: "Contacting the App Store…")
+    case .complete: String(localized: "Complete")
+    case .termsOfUse: String(localized: "Terms of Use")
+    case .privacyPolicy: String(localized: "Privacy Policy")
+    case .restore: String(localized: "Restore Purchases")
+    case .restoreHint: String(localized: "Restore a previous purchase on this Apple Account")
+    case .notNow: String(localized: "Not Now")
+    case .close: String(localized: "Close")
+    case .loadingPlans: String(localized: "Loading plans")
+    case .plansUnavailableTitle: String(localized: "Couldn’t Load Plans")
+    case .plansUnavailableMessage: String(localized: "Check your connection and try again.")
+    case .tryAgain: String(localized: "Try Again")
+    case .paymentsUnavailableTitle: String(localized: "Purchases Not Available")
+    case .paymentsUnavailableMessage: String(localized: "In-app purchases are turned off for this device or account.")
+    case .purchaseFailedTitle: String(localized: "Couldn’t Complete Purchase")
+    case .purchaseFailed: String(localized: "The purchase didn’t go through. Try again.")
+    case .pendingTitle: String(localized: "Purchase Pending")
+    case .pending: String(localized: "Your purchase is awaiting approval. You’ll get access as soon as it’s approved.")
+    case .productNotFound: String(localized: "This plan isn’t available right now. Try again later.")
+    case .verificationFailed: String(localized: "Your purchase couldn’t be verified. Try again.")
+    case .notActivated: String(localized: "This purchase didn’t activate Premium. Try again, or choose Restore Purchases.")
+    case .nothingToRestoreTitle: String(localized: "Nothing to Restore")
+    case .nothingToRestore: String(localized: "There are no purchases to restore on this account.")
+    case .restoreFailedTitle: String(localized: "Couldn’t Restore Purchases")
+    case .restoreFailed: String(localized: "Purchases couldn’t be restored. Try again.")
+    case .ok: String(localized: "OK")
+    case .thanksTitle: String(localized: "Welcome to Premium")
+    case .restoredTitle: String(localized: "Purchases Restored")
+    case .restoredSubtitle: String(localized: "Your Premium is back.")
+    }
+}
+```
 
 ### The service
 
@@ -141,7 +206,7 @@ Throw `PaywallError` for a specific alert. `.cancelled`, `CancellationError` and
 ## Scope
 
 - Plans are monthly, yearly and lifetime; any subset renders.
-- Copy ships in English and Swedish and says "Premium".
+- The kit ships no copy; the app supplies every string through `PaywallString`.
 - Terms of Use link Apple's standard EULA.
 
 ## Accessibility
@@ -162,9 +227,6 @@ swift test
 ```sh
 xcodebuild -scheme PaywallKit -destination 'generic/platform=iOS Simulator' build
 ```
-
-Toolchains before Swift 6.4 do not compile the string catalog under `swift test`, so tests compare
-against the kit's own lookups, never English literals.
 
 ## License
 
