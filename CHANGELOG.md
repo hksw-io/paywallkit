@@ -6,6 +6,11 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- On iPad the paywall sheet fits its content, so the Lifetime plan is no longer hidden behind the purchase button.
+- When the paywall has to scroll, for example when it opens over another sheet, it starts scrolled to the plans so every plan is visible above the purchase button.
+
 ## [1.1.1] - 2026-09-29
 
 ### Fixed

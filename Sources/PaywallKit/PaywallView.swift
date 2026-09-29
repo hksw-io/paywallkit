@@ -86,6 +86,7 @@ public struct PaywallView: View {
             .frame(maxHeight: PaywallMetrics.sheetMaxHeight)
         #else
             .presentationDetents([.large])
+            .presentationSizing(.form.fitted(horizontal: false, vertical: true))
         #endif
             .onChange(of: self.reduceMotion, initial: true) { _, reduceMotion in
                 self.model.reduceMotion = reduceMotion
@@ -174,6 +175,7 @@ public struct PaywallView: View {
                     }
                     .scrollIndicators(.hidden)
                     .scrollBounceBehavior(.basedOnSize)
+                    .defaultScrollAnchor(.bottom, for: .initialOffset)
                 }
 
                 PaywallActionFooter(model: self.model, privacyPolicy: self.privacyPolicy)
