@@ -6,11 +6,11 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
-## [2.0.0] - 2026-09-29
+## [1.1.0] - 2026-09-29
 
 ### Changed
 
-- **Breaking:** `PaywallView` requires `strings:`, a lookup that returns the app's text for each `PaywallString` case. Apps name their own subscription instead of "Premium" and localize the paywall in their own catalog. The README carries the previous English copy as a starting point.
+- **Breaking:** `PaywallView` requires `strings:`, a lookup that returns the app's text for each `PaywallString` case. Apps name their own subscription instead of "Premium" and localize the paywall in their own catalog. The README carries the previous English copy as a starting point. This ships as a minor release by choice; an app resolving "Up to Next Major" from 1.0.x must pass `strings:` when it updates.
 
 ### Removed
 
