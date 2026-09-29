@@ -6,6 +6,8 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-29
+
 ### Fixed
 
 - The paywall no longer freezes the app when its measured height changes by floating-point noise. On iPhone 17 Pro Max, opening it with a highlighted benefit re-measured the sheet forever at 100% CPU; changes under one point are now ignored.
