@@ -13,6 +13,7 @@ struct PaywallButtonMorph: View {
     let checkmarkSymbol: String
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.paywallStrings) private var strings
     @State private var displayed: Phase
     @State private var latestPhase: Phase
     @State private var labelFadeDone = false
@@ -39,7 +40,7 @@ struct PaywallButtonMorph: View {
             Image(systemName: self.checkmarkSymbol)
                 .symbolEffect(.drawOn, isActive: !self.reduceMotion && self.displayed != .success)
                 .opacity(self.displayed == .success ? 1 : 0)
-                .accessibilityLabel(localized("paywall.complete"))
+                .accessibilityLabel(self.strings(.complete))
                 .accessibilityHidden(self.displayed != .success)
         }
         .onChange(of: self.phase) { _, newPhase in

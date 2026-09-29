@@ -7,8 +7,8 @@ import StoreKit
 @Observable
 final class PaywallModel {
     struct Alert: Equatable {
-        var title: String
-        var message: String
+        var title: PaywallString
+        var message: PaywallString
     }
 
     static let thanksLead: Duration = .milliseconds(320)
@@ -175,9 +175,7 @@ final class PaywallModel {
         if entitlement == .entitled {
             self.finishPurchase(restored: true)
         } else {
-            self.alert = Alert(
-                title: localized("paywall.error.noPurchasesToRestore.title"),
-                message: localized("paywall.error.noPurchasesToRestore"))
+            self.alert = Alert(title: .nothingToRestoreTitle, message: .nothingToRestore)
         }
     }
 
@@ -189,9 +187,7 @@ final class PaywallModel {
         guard !self.didSucceed else { return }
         self.isRestoring = false
         guard !Self.isCancellation(error) else { return }
-        self.alert = Alert(
-            title: localized("paywall.error.restoreFailed.title"),
-            message: localized("paywall.error.restoreFailed"))
+        self.alert = Alert(title: .restoreFailedTitle, message: .restoreFailed)
     }
 
     private func loadProducts(forceRefresh: Bool) async {
@@ -262,24 +258,19 @@ final class PaywallModel {
 
     private static func alert(for error: Error) -> Alert? {
         guard !self.isCancellation(error) else { return nil }
-        let title = localized("paywall.error.title")
         switch error as? PaywallError {
         case .paymentsNotAllowed:
-            return Alert(
-                title: localized("paywall.payments.unavailable.title"),
-                message: localized("paywall.payments.unavailable.message"))
+            return Alert(title: .paymentsUnavailableTitle, message: .paymentsUnavailableMessage)
         case .pending:
-            return Alert(
-                title: localized("paywall.error.pending.title"),
-                message: localized("paywall.error.pending"))
+            return Alert(title: .pendingTitle, message: .pending)
         case .productNotFound:
-            return Alert(title: title, message: localized("paywall.error.productNotFound"))
+            return Alert(title: .purchaseFailedTitle, message: .productNotFound)
         case .verificationFailed:
-            return Alert(title: title, message: localized("paywall.error.verificationFailed"))
+            return Alert(title: .purchaseFailedTitle, message: .verificationFailed)
         case .notActivated:
-            return Alert(title: title, message: localized("paywall.error.entitlementNotActive"))
+            return Alert(title: .purchaseFailedTitle, message: .notActivated)
         case .cancelled, .failed, nil:
-            return Alert(title: title, message: localized("paywall.error.generic"))
+            return Alert(title: .purchaseFailedTitle, message: .purchaseFailed)
         }
     }
 }

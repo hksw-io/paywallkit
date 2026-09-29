@@ -66,9 +66,29 @@ struct PaywallBrand: Equatable {
     }
 }
 
+/// The app's copy lookup, compared by identity so the environment doesn't invalidate on every update.
+final class PaywallStringTable: Equatable, Sendable {
+    let lookup: @Sendable (PaywallString) -> String
+
+    init(_ lookup: @escaping @Sendable (PaywallString) -> String) {
+        self.lookup = lookup
+    }
+
+    func callAsFunction(_ string: PaywallString) -> String {
+        self.lookup(string)
+    }
+
+    static let empty = PaywallStringTable { _ in "" }
+
+    static func == (lhs: PaywallStringTable, rhs: PaywallStringTable) -> Bool {
+        lhs === rhs
+    }
+}
+
 extension EnvironmentValues {
     @Entry var paywallBrand = PaywallBrand(base: .accentColor, light: .accentColor)
     @Entry var paywallHapticsEnabled = true
     @Entry var paywallAnimatesDecorations = true
+    @Entry var paywallStrings = PaywallStringTable.empty
 }
 #endif

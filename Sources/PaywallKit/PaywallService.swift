@@ -71,6 +71,70 @@ public enum PaywallError: Error, Sendable, Equatable {
     case failed
 }
 
+/// Every piece of copy the paywall shows or speaks. The kit ships no strings: pass `PaywallView` a
+/// lookup that returns the app's localized text for each case.
+public enum PaywallString: Hashable, Sendable {
+    /// Heading above the benefits, such as "Everything in Premium".
+    case benefitsHeader
+    /// Appended to the highlighted benefit for VoiceOver, such as "the feature you tried to use".
+    case highlightedBenefit
+    /// A plan's name, such as "Monthly".
+    case plan(PaywallPlan)
+    /// A plan's billing line when no trial is offered, such as "Billed monthly" or "One-time purchase".
+    case billing(PaywallPlan)
+    /// The yearly plan's savings badge, such as "Save 20%".
+    case savePercent(Int)
+    /// The yearly plan's monthly equivalent, such as "$3.33/mo".
+    case perMonth(price: String)
+    case subscribe
+    case startTrial
+    case purchase
+    /// Under the call to action for a subscription, such as "Cancel anytime."
+    case subscriptionReassurance
+    /// Under the call to action for the lifetime plan, such as "Yours forever after one purchase."
+    case lifetimeReassurance
+    /// The App Store's required trial-conversion disclosure for the monthly plan.
+    case monthlyTrialDisclosure(trial: String, price: String)
+    /// The App Store's required trial-conversion disclosure for the yearly plan.
+    case yearlyTrialDisclosure(trial: String, price: String)
+    /// Shown while a purchase runs, such as "Contacting the App Store…".
+    case purchasing
+    /// VoiceOver label for the call to action's success checkmark.
+    case complete
+    case termsOfUse
+    case privacyPolicy
+    case restore
+    /// VoiceOver hint for Restore Purchases.
+    case restoreHint
+    /// The macOS dismiss button.
+    case notNow
+    /// VoiceOver label for the iOS close button.
+    case close
+    /// VoiceOver label for the plan placeholders while plans load.
+    case loadingPlans
+    case plansUnavailableTitle
+    case plansUnavailableMessage
+    case tryAgain
+    case paymentsUnavailableTitle
+    case paymentsUnavailableMessage
+    case purchaseFailedTitle
+    case purchaseFailed
+    case pendingTitle
+    case pending
+    case productNotFound
+    case verificationFailed
+    /// The purchase went through but did not grant access.
+    case notActivated
+    case nothingToRestoreTitle
+    case nothingToRestore
+    case restoreFailedTitle
+    case restoreFailed
+    case ok
+    case thanksTitle
+    case restoredTitle
+    case restoredSubtitle
+}
+
 public struct PaywallBenefit: Identifiable, Equatable, Sendable {
     public let id: String
     public let systemImage: String

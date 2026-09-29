@@ -207,6 +207,7 @@ struct PaywallActionFooter: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.paywallHapticsEnabled) private var hapticEnabled
+    @Environment(\.paywallStrings) private var strings
 
     private var arrowSwayPhases: [CGFloat] {
         self.reduceMotion ? [0] : [0, 5]
@@ -229,16 +230,17 @@ struct PaywallActionFooter: View {
 
             Group {
                 if self.model.isPurchasePending {
-                    Text(localized("paywall.error.pending"))
+                    Text(self.strings(.pending))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 } else if self.model.isPurchasing {
-                    self.caption(localized("paywall.purchasing"), style: .primary)
+                    self.caption(self.strings(.purchasing), style: .primary)
                 } else {
                     self.caption(
-                        PaywallCopy.reassurance(for: self.model.selectedPlan, product: self.model.selectedProduct),
+                        self.strings(
+                            PaywallCopy.reassurance(for: self.model.selectedPlan, product: self.model.selectedProduct)),
                         style: .secondary)
                 }
             }
@@ -276,7 +278,7 @@ struct PaywallActionFooter: View {
             HStack(spacing: 8) {
                 PaywallButtonMorph(
                     phase: self.phase,
-                    title: callToAction.title,
+                    title: self.strings(callToAction),
                     checkmarkSymbol: "checkmark.seal.fill")
                     .font(.headline.weight(.semibold))
                     .environment(\.colorScheme, .dark)
@@ -319,6 +321,8 @@ struct PaywallFooterLinks: View {
     let model: PaywallModel
     let privacyPolicy: URL
 
+    @Environment(\.paywallStrings) private var strings
+
     var body: some View {
         ViewThatFits(in: .horizontal) {
             HStack(spacing: PaywallMetrics.footerSpacing) {
@@ -340,14 +344,14 @@ struct PaywallFooterLinks: View {
     @ViewBuilder
     private var termsLink: some View {
         if let url = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/") {
-            Link(localized("paywall.termsOfUse"), destination: url)
+            Link(self.strings(.termsOfUse), destination: url)
                 .foregroundStyle(.secondary)
                 .font(.footnote)
         }
     }
 
     private var privacyLink: some View {
-        Link(localized("paywall.privacyPolicy"), destination: self.privacyPolicy)
+        Link(self.strings(.privacyPolicy), destination: self.privacyPolicy)
             .foregroundStyle(.secondary)
             .font(.footnote)
     }
@@ -364,7 +368,7 @@ struct PaywallFooterLinks: View {
             Task { await self.model.restore() }
         } label: {
             HStack(spacing: 6) {
-                Text(localized("paywall.restore"))
+                Text(self.strings(.restore))
 
                 if self.model.isRestoring {
                     ProgressView()
@@ -378,16 +382,18 @@ struct PaywallFooterLinks: View {
         .foregroundStyle(.secondary)
         .font(.footnote)
         .disabled(self.model.isPurchasing || self.model.isRestoring)
-        .accessibilityHint(localized("paywall.restore.help"))
+        .accessibilityHint(self.strings(.restoreHint))
     }
 }
 
 struct PaywallDismissButton: View {
     let onDismiss: () -> Void
 
+    @Environment(\.paywallStrings) private var strings
+
     var body: some View {
         #if os(macOS)
-            Button(localized("paywall.notNow"), action: self.onDismiss)
+            Button(self.strings(.notNow), action: self.onDismiss)
                 .keyboardShortcut(.cancelAction)
                 .padding(.trailing, 16)
                 .padding(.top, 12)
@@ -399,7 +405,7 @@ struct PaywallDismissButton: View {
             }
             .buttonStyle(.glass)
             .buttonBorderShape(.circle)
-            .accessibilityLabel(localized("paywall.close"))
+            .accessibilityLabel(self.strings(.close))
             .padding(.trailing, 16)
             .padding(.top, 16)
         #endif

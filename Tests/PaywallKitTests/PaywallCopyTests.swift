@@ -4,6 +4,8 @@ import Testing
 @testable import PaywallKit
 
 struct PaywallCopyTests {
+    private static let strings: @Sendable (PaywallString) -> String = { "\($0)" }
+
     private static func product(_ plan: PaywallPlan, price: Decimal = 0, trial: String? = nil) -> PaywallProduct {
         PaywallProduct(
             plan: plan,
@@ -28,24 +30,17 @@ struct PaywallCopyTests {
     }
 
     @Test
-    func `every plan has a distinct display name`() {
-        let names = PaywallPlan.allCases.map(PaywallCopy.displayName)
-        #expect(Set(names).count == PaywallPlan.allCases.count)
-        #expect(names.allSatisfy { !$0.isEmpty })
-    }
-
-    @Test
-    func `every plan has a distinct billing subtitle without an offer`() {
-        let subtitles = PaywallPlan.allCases.map {
-            PaywallCopy.subtitle(for: $0, product: Self.product($0))
+    func `without an offer each plan shows its billing line`() {
+        for plan in PaywallPlan.allCases {
+            #expect(PaywallCopy.subtitle(for: plan, product: Self.product(plan), strings: Self.strings)
+                == Self.strings(.billing(plan)))
         }
-        #expect(Set(subtitles).count == PaywallPlan.allCases.count)
     }
 
     @Test
     func `an eligible intro offer replaces the billing subtitle`() {
         let offered = Self.product(.yearly, price: 100, trial: "7 days free")
-        #expect(PaywallCopy.subtitle(for: .yearly, product: offered) == "7 days free")
+        #expect(PaywallCopy.subtitle(for: .yearly, product: offered, strings: Self.strings) == "7 days free")
     }
 
     @Test
@@ -56,8 +51,8 @@ struct PaywallCopyTests {
             introductoryOfferText: "7 days free",
             isEligibleForIntroOffer: false)
         #expect(
-            PaywallCopy.subtitle(for: .yearly, product: ineligible)
-                == PaywallCopy.subtitle(for: .yearly, product: nil))
+            PaywallCopy.subtitle(for: .yearly, product: ineligible, strings: Self.strings)
+                == Self.strings(.billing(.yearly)))
     }
 
     @Test
@@ -80,15 +75,15 @@ struct PaywallCopyTests {
 
         #expect(
             PaywallCopy.trialConversionDisclosure(for: monthly)
-                == localized("paywall.cta.reassurance.trial.monthly \("1 month free") \("$5.99")"))
+                == .monthlyTrialDisclosure(trial: "1 month free", price: "$5.99"))
         #expect(
             PaywallCopy.trialConversionDisclosure(for: yearly)
-                == localized("paywall.cta.reassurance.trial.yearly \("7 days free") \("$39.99")"))
+                == .yearlyTrialDisclosure(trial: "7 days free", price: "$39.99"))
     }
 
     @Test
     func `only the yearly plan carries a savings badge`() {
-        #expect(PaywallCopy.badge(for: .yearly, products: Self.priced) != nil)
+        #expect(PaywallCopy.badge(for: .yearly, products: Self.priced) == .savePercent(16))
         #expect(PaywallCopy.badge(for: .monthly, products: Self.priced) == nil)
         #expect(PaywallCopy.badge(for: .lifetime, products: Self.priced) == nil)
     }
@@ -125,17 +120,14 @@ struct PaywallCopyTests {
     @Test
     func `a trial disclosure replaces the reassurance line`() {
         let offered = Self.product(.yearly, price: 100, trial: "7 days free")
-        let withTrial = PaywallCopy.reassurance(for: .yearly, product: offered)
-        let withoutTrial = PaywallCopy.reassurance(for: .yearly, product: nil)
-        #expect(withTrial != withoutTrial)
-        #expect(!withTrial.isEmpty)
+        #expect(PaywallCopy.reassurance(for: .yearly, product: offered)
+            == .yearlyTrialDisclosure(trial: "7 days free", price: "$9.99"))
+        #expect(PaywallCopy.reassurance(for: .yearly, product: nil) == .subscriptionReassurance)
     }
 
     @Test
     func `lifetime reassurance differs from the subscription reassurance`() {
-        #expect(
-            PaywallCopy.reassurance(for: .lifetime, product: nil)
-                != PaywallCopy.reassurance(for: .yearly, product: nil))
+        #expect(PaywallCopy.reassurance(for: .lifetime, product: nil) == .lifetimeReassurance)
     }
 
     @Test
@@ -143,17 +135,16 @@ struct PaywallCopyTests {
         let label = PaywallCopy.accessibilityLabel(
             for: .yearly,
             product: Self.product(.yearly, price: 100),
-            badge: "Save 17%")
+            badge: .savePercent(17),
+            strings: Self.strings)
 
-        #expect(label.contains(PaywallCopy.displayName(.yearly)))
-        #expect(label.contains("Save 17%"))
-        #expect(label.contains("$9.99"))
+        #expect(label == [Self.strings(.plan(.yearly)), "$9.99", Self.strings(.savePercent(17))].joined(separator: ", "))
     }
 
     @Test
     func `the accessibility label survives a missing product`() {
-        let label = PaywallCopy.accessibilityLabel(for: .lifetime, product: nil, badge: nil)
-        #expect(label.contains(PaywallCopy.displayName(.lifetime)))
+        let label = PaywallCopy.accessibilityLabel(for: .lifetime, product: nil, badge: nil, strings: Self.strings)
+        #expect(label == Self.strings(.plan(.lifetime)))
     }
 
 }

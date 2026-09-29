@@ -5,6 +5,7 @@ struct PaywallPricing: View {
     let model: PaywallModel
 
     @Environment(\.paywallHapticsEnabled) private var hapticEnabled
+    @Environment(\.paywallStrings) private var strings
 
     var body: some View {
         Group {
@@ -12,13 +13,13 @@ struct PaywallPricing: View {
                 PaywallPricingSkeleton()
             } else if self.model.paymentsUnavailable {
                 PaywallPricingMessage(
-                    title: localized("paywall.payments.unavailable.title"),
-                    message: localized("paywall.payments.unavailable.message"),
+                    title: self.strings(.paymentsUnavailableTitle),
+                    message: self.strings(.paymentsUnavailableMessage),
                     onRetry: nil)
             } else if self.model.productsUnavailable {
                 PaywallPricingMessage(
-                    title: localized("paywall.products.unavailable.title"),
-                    message: localized("paywall.products.unavailable.message"),
+                    title: self.strings(.plansUnavailableTitle),
+                    message: self.strings(.plansUnavailableMessage),
                     onRetry: { Task { await self.model.retryLoadProducts() } })
             } else {
                 VStack(spacing: 6) {
@@ -36,6 +37,8 @@ private struct PaywallTierButton: View {
     let model: PaywallModel
     let tier: PaywallPlan
 
+    @Environment(\.paywallStrings) private var strings
+
     var body: some View {
         Button {
             self.model.select(self.tier)
@@ -50,7 +53,8 @@ private struct PaywallTierButton: View {
             PaywallCopy.accessibilityLabel(
                 for: self.tier,
                 product: self.model.product(for: self.tier),
-                badge: PaywallCopy.badge(for: self.tier, products: self.model.products)))
+                badge: PaywallCopy.badge(for: self.tier, products: self.model.products),
+                strings: self.strings.lookup))
     }
 }
 
@@ -97,6 +101,7 @@ private struct PaywallTierCard: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.paywallSheetHeight) private var sheetHeight
+    @Environment(\.paywallStrings) private var strings
 
     private var isSelected: Bool {
         self.model.selectedPlan == self.tier
@@ -141,7 +146,7 @@ private struct PaywallTierCard: View {
                     self.name
 
                     if let badge = PaywallCopy.badge(for: self.tier, products: self.model.products) {
-                        PaywallSavingsBadge(text: badge)
+                        PaywallSavingsBadge(text: self.strings(badge))
                     }
 
                     self.subtitle
@@ -161,7 +166,7 @@ private struct PaywallTierCard: View {
                             .layoutPriority(1)
 
                         if let badge = PaywallCopy.badge(for: self.tier, products: self.model.products) {
-                            PaywallSavingsBadge(text: badge)
+                            PaywallSavingsBadge(text: self.strings(badge))
                         }
                     }
 
@@ -176,14 +181,14 @@ private struct PaywallTierCard: View {
     }
 
     private var name: some View {
-        Text(PaywallCopy.displayName(self.tier))
+        Text(self.strings(.plan(self.tier)))
             .font(.headline.weight(.semibold))
             .foregroundStyle(.primary)
             .lineLimit(self.dynamicTypeSize.isAccessibilitySize ? 2 : 1)
     }
 
     private var subtitle: some View {
-        Text(PaywallCopy.subtitle(for: self.tier, product: self.product))
+        Text(PaywallCopy.subtitle(for: self.tier, product: self.product, strings: self.strings.lookup))
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .lineLimit(self.dynamicTypeSize.isAccessibilitySize ? nil : 2)
@@ -199,7 +204,7 @@ private struct PaywallTierCard: View {
                 .minimumScaleFactor(0.7)
 
             if let monthlyEquivalent = self.product?.monthlyEquivalentPrice {
-                Text(localized("paywall.price.perMonth \(monthlyEquivalent)"))
+                Text(self.strings(.perMonth(price: monthlyEquivalent)))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(self.dynamicTypeSize.isAccessibilitySize ? 2 : 1)
@@ -213,6 +218,8 @@ private struct PaywallPricingMessage: View {
     let message: String
     let onRetry: (() -> Void)?
 
+    @Environment(\.paywallStrings) private var strings
+
     var body: some View {
         VStack(spacing: 12) {
             Text(self.title)
@@ -224,7 +231,7 @@ private struct PaywallPricingMessage: View {
                 .multilineTextAlignment(.center)
 
             if let onRetry {
-                Button(localized("paywall.tryAgain"), action: onRetry)
+                Button(self.strings(.tryAgain), action: onRetry)
                     .buttonStyle(.bordered)
             }
         }

@@ -15,6 +15,7 @@ public struct PaywallView: View {
     let onDismiss: () -> Void
 
     @State private var model: PaywallModel
+    @State private var strings: PaywallStringTable
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -23,10 +24,11 @@ public struct PaywallView: View {
 
     /// - Parameters:
     ///   - icon: The app icon shown as the hero and in the thank-you celebration.
-    ///   - benefits: The rows under "Everything in Premium", in display order.
+    ///   - benefits: The rows under `.benefitsHeader`, in display order.
     ///   - highlightedBenefitID: The benefit the user just tried to use; it is tinted and announced.
-    ///   - thanksLines: App-specific lines under "Welcome to Premium" after a purchase.
+    ///   - thanksLines: App-specific lines under `.thanksTitle` after a purchase.
     ///   - privacyPolicy: Linked in the footer next to Apple's standard Terms of Use.
+    ///   - strings: Returns the app's localized text for each piece of copy. The kit ships none.
     ///   - brand: Base brand colour for glows, shadows and benefit tiles.
     ///   - brandLight: Lighter stop of the brand gradient.
     ///   - wallpaperSymbols: SF Symbols tiled faintly behind the sheet; empty draws none.
@@ -39,6 +41,7 @@ public struct PaywallView: View {
         highlightedBenefitID: String? = nil,
         thanksLines: [Text],
         privacyPolicy: URL,
+        strings: @escaping @Sendable (PaywallString) -> String,
         brand: Color = .accentColor,
         brandLight: Color = .accentColor,
         wallpaperSymbols: [String] = [],
@@ -53,6 +56,7 @@ public struct PaywallView: View {
         self.highlightedBenefitID = highlightedBenefitID
         self.thanksLines = thanksLines
         self.privacyPolicy = privacyPolicy
+        self._strings = State(initialValue: PaywallStringTable(strings))
         self.brand = PaywallBrand(base: brand, light: brandLight)
         self.wallpaperSymbols = wallpaperSymbols
         self.hapticsEnabled = hapticsEnabled
@@ -104,7 +108,7 @@ public struct PaywallView: View {
                 }
             }
             .alert(
-                self.model.alert?.title ?? localized("paywall.error.title"),
+                self.strings(self.model.alert?.title ?? .purchaseFailedTitle),
                 isPresented: .init(
                     get: { self.model.alert != nil },
                     set: {
@@ -112,17 +116,18 @@ public struct PaywallView: View {
                             self.model.dismissAlert()
                         }
                     })) {
-                Button(localized("paywall.ok")) {
+                Button(self.strings(.ok)) {
                     self.model.dismissAlert()
                 }
             } message: {
                 if let alert = self.model.alert {
-                    Text(alert.message)
+                    Text(self.strings(alert.message))
                 }
             }
             .environment(\.paywallBrand, self.brand)
             .environment(\.paywallHapticsEnabled, self.hapticsEnabled)
             .environment(\.paywallAnimatesDecorations, self.animatesDecorations)
+            .environment(\.paywallStrings, self.strings)
     }
 
     private var contentArea: some View {

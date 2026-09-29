@@ -6,10 +6,11 @@ struct PaywallBenefitsSection: View {
     let highlightedID: String?
 
     @Environment(\.paywallSheetHeight) private var sheetHeight
+    @Environment(\.paywallStrings) private var strings
 
     var body: some View {
         VStack(alignment: .leading, spacing: Tokens.Spacing.medium) {
-            Text(localized("paywall.benefits.header"))
+            Text(self.strings(.benefitsHeader))
                 .font(PaywallMetrics.titleFont(for: self.sheetHeight))
                 .foregroundStyle(PaywallTitleStyle.gradient)
                 .multilineTextAlignment(.center)
@@ -57,6 +58,7 @@ private struct PaywallBenefitRow: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.paywallSheetHeight) private var sheetHeight
     @Environment(\.paywallBrand) private var brand
+    @Environment(\.paywallStrings) private var strings
     @State private var haloAngle: Double = 0
 
     private var tileSize: CGFloat {
@@ -140,7 +142,7 @@ private struct PaywallBenefitRow: View {
 
     private var accessibilityLabel: String {
         guard self.isFocused else { return self.benefit.title }
-        return "\(self.benefit.title), \(localized("paywall.benefit.trigger"))"
+        return "\(self.benefit.title), \(self.strings(.highlightedBenefit))"
     }
 }
 #endif

@@ -6,6 +6,7 @@ struct PaywallPricingSkeleton: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.paywallAnimatesDecorations) private var decorativeMotionEnabled
     @Environment(\.paywallSheetHeight) private var sheetHeight
+    @Environment(\.paywallStrings) private var strings
 
     var body: some View {
         self.placeholders
@@ -15,7 +16,7 @@ struct PaywallPricingSkeleton: View {
                 }
             }
             .accessibilityElement()
-            .accessibilityLabel(localized("paywall.products.loading"))
+            .accessibilityLabel(self.strings(.loadingPlans))
             .onAppear {
                 guard !self.reduceMotion, self.decorativeMotionEnabled else { return }
                 withAnimation(Tokens.Animations.skeletonShimmer) {

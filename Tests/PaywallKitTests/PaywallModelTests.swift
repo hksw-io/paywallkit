@@ -275,9 +275,7 @@ struct PaywallModelTests {
         await model.purchase()
         #expect(!model.isPurchasing)
         #expect(!model.canMakePayments)
-        #expect(model.alert == PaywallModel.Alert(
-            title: localized("paywall.payments.unavailable.title"),
-            message: localized("paywall.payments.unavailable.message")))
+        #expect(model.alert == PaywallModel.Alert(title: .paymentsUnavailableTitle, message: .paymentsUnavailableMessage))
         #expect(model.paymentsUnavailable)
 
         model.dismissAlert()
@@ -333,21 +331,19 @@ struct PaywallModelTests {
     }
 
     @Test(arguments: [
-        (PaywallError.productNotFound as any Error, "paywall.error.productNotFound"),
-        (PaywallError.verificationFailed, "paywall.error.verificationFailed"),
-        (PaywallError.failed, "paywall.error.generic"),
-        (TestError(), "paywall.error.generic"),
+        (PaywallError.productNotFound as any Error, PaywallString.productNotFound),
+        (PaywallError.verificationFailed, .verificationFailed),
+        (PaywallError.failed, .purchaseFailed),
+        (TestError(), .purchaseFailed),
     ])
-    func `a failed purchase names the failure`(error: any Error, messageKey: String) async {
+    func `a failed purchase names the failure`(error: any Error, message: PaywallString) async {
         let service = FakePaywallService()
         service.purchaseError = error
         let model = self.makeModel(service: service)
 
         await model.purchase()
         #expect(!model.isPurchasing)
-        #expect(model.alert == PaywallModel.Alert(
-            title: localized("paywall.error.title"),
-            message: localized(String.LocalizationValue(messageKey))))
+        #expect(model.alert == PaywallModel.Alert(title: .purchaseFailedTitle, message: message))
     }
 
     @Test
@@ -358,9 +354,7 @@ struct PaywallModelTests {
 
         await model.purchase()
         #expect(model.isPurchasePending)
-        #expect(model.alert == PaywallModel.Alert(
-            title: localized("paywall.error.pending.title"),
-            message: localized("paywall.error.pending")))
+        #expect(model.alert == PaywallModel.Alert(title: .pendingTitle, message: .pending))
     }
 
     @Test
@@ -393,9 +387,7 @@ struct PaywallModelTests {
         let model = self.makeModel(service: service)
 
         await model.purchase()
-        #expect(model.alert == PaywallModel.Alert(
-            title: localized("paywall.error.title"),
-            message: localized("paywall.error.entitlementNotActive")))
+        #expect(model.alert == PaywallModel.Alert(title: .purchaseFailedTitle, message: .notActivated))
         #expect(!model.didSucceed)
         #expect(model.celebration == nil)
     }
@@ -403,7 +395,7 @@ struct PaywallModelTests {
     @Test
     func `dismiss error clears alert`() {
         let model = self.makeModel()
-        model.alert = PaywallModel.Alert(title: "title", message: "error")
+        model.alert = PaywallModel.Alert(title: .purchaseFailedTitle, message: .purchaseFailed)
         model.dismissAlert()
         #expect(model.alert == nil)
     }
@@ -431,9 +423,7 @@ struct PaywallModelTests {
 
         await model.restore()
         #expect(!model.isRestoring)
-        #expect(model.alert == PaywallModel.Alert(
-            title: localized("paywall.error.noPurchasesToRestore.title"),
-            message: localized("paywall.error.noPurchasesToRestore")))
+        #expect(model.alert == PaywallModel.Alert(title: .nothingToRestoreTitle, message: .nothingToRestore))
         #expect(!model.shouldDismiss)
     }
 
@@ -445,9 +435,7 @@ struct PaywallModelTests {
 
         await model.restore()
         #expect(!model.isRestoring)
-        #expect(model.alert == PaywallModel.Alert(
-            title: localized("paywall.error.restoreFailed.title"),
-            message: localized("paywall.error.restoreFailed")))
+        #expect(model.alert == PaywallModel.Alert(title: .restoreFailedTitle, message: .restoreFailed))
     }
 
     @Test

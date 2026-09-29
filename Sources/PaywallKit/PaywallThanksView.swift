@@ -8,15 +8,14 @@ struct PaywallThanksView<Icon: View>: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.paywallSheetHeight) private var sheetHeight
+    @Environment(\.paywallStrings) private var strings
 
     @State private var titleShown = false
     @State private var subtitleShown = false
     @State private var sheenPhase: CGFloat = 0
 
     private var titleText: String {
-        self.didRestore
-            ? localized("paywall.restore.title")
-            : localized("paywall.thanks.title")
+        self.strings(self.didRestore ? .restoredTitle : .thanksTitle)
     }
 
     private var titleFont: Font {
@@ -40,7 +39,7 @@ struct PaywallThanksView<Icon: View>: View {
 
                 VStack(spacing: 3) {
                     if self.didRestore {
-                        Text(localized("paywall.restore.subtitle"))
+                        Text(self.strings(.restoredSubtitle))
                     } else {
                         ForEach(self.lines.indices, id: \.self) { index in
                             self.lines[index]
