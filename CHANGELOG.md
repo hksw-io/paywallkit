@@ -6,6 +6,8 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-09-29
+
 ### Fixed
 
 - On iPad the paywall sheet fits its content, so the Lifetime plan is no longer hidden behind the purchase button.
