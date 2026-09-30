@@ -64,7 +64,14 @@ final class PaywallModel {
     }
 
     var isPurchaseButtonEnabled: Bool {
-        self.canPurchase || self.isPurchasing || self.didSucceed
+        self.canPurchase || self.isPurchasing || self.didSucceed || self.isRestoringWithPurchasablePlan
+    }
+
+    private var isRestoringWithPurchasablePlan: Bool {
+        self.isRestoring
+            && self.canMakePayments
+            && self.selectedProduct != nil
+            && !self.isPurchasePending
     }
 
     var selectedProduct: PaywallProduct? {

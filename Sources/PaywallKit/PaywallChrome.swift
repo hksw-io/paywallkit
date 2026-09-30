@@ -311,6 +311,7 @@ struct PaywallActionFooter: View {
         .controlSize(.large)
         .tint(.accentColor)
         .disabled(!self.model.isPurchaseButtonEnabled)
+        .allowsHitTesting(!self.model.isRestoring)
         .sensoryFeedback(.success, trigger: self.phase == .success) { _, isSuccess in
             self.hapticEnabled && isSuccess
         }

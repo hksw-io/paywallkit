@@ -155,10 +155,16 @@ struct PaywallModelTests {
         model.didSucceed = true
         #expect(model.isPurchaseButtonEnabled)
         model.didSucceed = false
+        model.isRestoring = true
+        #expect(!model.canPurchase)
+        #expect(model.isPurchaseButtonEnabled)
+        model.isRestoring = false
         model.isPurchasePending = true
         #expect(!model.isPurchaseButtonEnabled)
         model.isPurchasePending = false
         model.products = []
+        #expect(!model.isPurchaseButtonEnabled)
+        model.isRestoring = true
         #expect(!model.isPurchaseButtonEnabled)
     }
 
