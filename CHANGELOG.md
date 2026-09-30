@@ -6,6 +6,12 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-09-30
+
+### Fixed
+
+- While Restore Purchases runs, the purchase button keeps its normal look instead of dimming behind the App Store's sign-in sheet. It ignores taps until the restore finishes.
+
 ## [1.1.2] - 2026-09-29
 
 ### Fixed
