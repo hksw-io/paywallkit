@@ -68,6 +68,7 @@ import PaywallKit
 func paywallText(_ string: PaywallString) -> String {
     switch string {
     case .benefitsHeader: String(localized: "Everything in Premium")
+    case .benefitsSubtitle: ""
     case .highlightedBenefit: String(localized: "the feature you tried to use")
     case .plan(.monthly): String(localized: "Monthly")
     case .plan(.yearly): String(localized: "Yearly")

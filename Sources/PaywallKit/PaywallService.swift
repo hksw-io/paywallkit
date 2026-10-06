@@ -76,6 +76,8 @@ public enum PaywallError: Error, Sendable, Equatable {
 public enum PaywallString: Hashable, Sendable {
     /// Heading above the benefits, such as "Everything in Premium".
     case benefitsHeader
+    /// A sentence under the heading; return an empty string to show none.
+    case benefitsSubtitle
     /// Appended to the highlighted benefit for VoiceOver, such as "the feature you tried to use".
     case highlightedBenefit
     /// A plan's name, such as "Monthly".

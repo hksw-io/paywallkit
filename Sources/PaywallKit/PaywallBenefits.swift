@@ -10,12 +10,22 @@ struct PaywallBenefitsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Tokens.Spacing.medium) {
-            Text(self.strings(.benefitsHeader))
-                .font(PaywallMetrics.titleFont(for: self.sheetHeight))
-                .foregroundStyle(PaywallTitleStyle.gradient)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .accessibilityAddTraits(.isHeader)
+            VStack(spacing: Tokens.Spacing.xxSmall) {
+                Text(self.strings(.benefitsHeader))
+                    .font(PaywallMetrics.titleFont(for: self.sheetHeight))
+                    .foregroundStyle(PaywallTitleStyle.gradient)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityAddTraits(.isHeader)
+
+                if !self.strings(.benefitsSubtitle).isEmpty {
+                    Text(self.strings(.benefitsSubtitle))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                }
+            }
 
             PaywallBenefitsList(benefits: self.benefits, highlightedID: self.highlightedID)
         }
