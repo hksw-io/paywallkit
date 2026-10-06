@@ -6,6 +6,16 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-06
+
+### Added
+
+- `PaywallString.benefitsSubtitle`: a sentence under the heading, hidden when the app returns an empty string. Apps that switch over `PaywallString` need a case for it.
+
+### Fixed
+
+- On Mac the purchase button's label stayed white when its window was in the background, where macOS draws the button grey. The label now follows the system colour there.
+
 ## [1.1.3] - 2026-09-30
 
 ### Fixed
