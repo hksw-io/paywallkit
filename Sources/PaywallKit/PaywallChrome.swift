@@ -208,9 +208,21 @@ struct PaywallActionFooter: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.paywallHapticsEnabled) private var hapticEnabled
     @Environment(\.paywallStrings) private var strings
+    #if os(macOS)
+        @Environment(\.appearsActive) private var appearsActive
+        @Environment(\.colorScheme) private var colorScheme
+    #endif
 
     private var arrowSwayPhases: [CGFloat] {
         self.reduceMotion ? [0] : [0, 5]
+    }
+
+    private var callToActionScheme: ColorScheme {
+        #if os(macOS)
+            self.appearsActive ? .dark : self.colorScheme
+        #else
+            .dark
+        #endif
     }
 
     private var phase: PaywallButtonMorph.Phase {
@@ -281,7 +293,7 @@ struct PaywallActionFooter: View {
                     title: self.strings(callToAction),
                     checkmarkSymbol: "checkmark.seal.fill")
                     .font(.headline.weight(.semibold))
-                    .environment(\.colorScheme, .dark)
+                    .environment(\.colorScheme, self.callToActionScheme)
 
                 if self.phase == .idle, !isAccessibilitySize {
                     Image(systemName: "arrow.right")
