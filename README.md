@@ -10,6 +10,33 @@ The kit owns the purchase flow — loading plans, selection, purchase, restore, 
 and the celebration. The app owns StoreKit and entitlement policy behind a small `PaywallService`
 protocol. No dependencies.
 
+## Preview
+
+<p>
+  <img src="Docs/Media/paywallkit-demo.webp" width="240" alt="The paywall on iPhone: choosing Lifetime turns the call to action into Purchase, choosing Yearly turns it back into Start Free Trial, and tapping it shows Contacting the App Store before the sheet gives way to a Welcome to Premium celebration.">
+</p>
+
+Choosing a plan morphs the call to action, and a purchase plays the in-sheet thank-you
+celebration.
+
+<p>
+  <img src="Docs/Media/paywallkit-iphone-light.jpg" width="240" alt="The paywall on iPhone in light mode: a glowing app icon over a faint tiled symbol wallpaper, Everything in Premium with four benefits and Custom themes highlighted, Monthly, Yearly and Lifetime plan cards with Yearly selected and a Save 44% badge, and a Start Free Trial button above the trial disclosure.">
+  <img src="Docs/Media/paywallkit-iphone-dark.jpg" width="240" alt="The same paywall on iPhone in dark mode.">
+  <img src="Docs/Media/paywallkit-iphone-thanks.jpg" width="240" alt="The thank-you celebration: the app icon centered over a soft blue wash, with Welcome to Premium and Thank you for supporting MyApp.">
+</p>
+
+The yearly plan with its free trial, per-month price and savings badge; the same sheet in dark
+mode; and the celebration after a purchase. The tinted row is `highlightedBenefitID`.
+
+<p>
+  <img src="Docs/Media/paywallkit-ipad-light.jpg" width="320" alt="The paywall on iPad presented as a centered form sheet.">
+  <img src="Docs/Media/paywallkit-mac-light.png" width="280" alt="The paywall on macOS in light mode, presented as a sheet in a window with a Not Now button at the top right.">
+  <img src="Docs/Media/paywallkit-mac-dark.png" width="280" alt="The paywall on macOS in dark mode.">
+</p>
+
+On iPad the paywall is a form sheet. On macOS it is a window sheet, and the close button reads
+Not Now.
+
 ## Requirements
 
 - iOS 26+ / macOS 26+
@@ -18,10 +45,10 @@ protocol. No dependencies.
 ## Installation
 
 ```swift
-.package(url: "https://github.com/hksw-io/paywallkit.git", from: "1.1.0")
+.package(url: "https://github.com/hksw-io/paywallkit.git", from: "1.2.0")
 ```
 
-Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and choose **Up to Next Major Version** from `1.1.0`.
+Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and choose **Up to Next Major Version** from `1.2.0`.
 
 ## Usage
 
@@ -50,22 +77,29 @@ import SwiftUI
 `highlightedBenefitID` names the feature the user just tried to use; that row is tinted and
 announced. Set `brand` and `brandLight` to your brand colours (both default to the accent colour),
 pass `wallpaperSymbols` for a faint tiled backdrop, and forward your app's haptics preference as
-`hapticsEnabled`. `animatesDecorations: false` stills the ambient loops, for example under UI tests.
+`hapticsEnabled`. `animatesDecorations: false` stops the celebration's breathing icon and drifting
+backdrop and the loading shimmer, for example under UI tests. The highlighted row's halo and the
+purchase button's arrow keep moving; only Reduce Motion stops them. Pass `showsDismissButton: false`
+to hide the kit's close button (Not Now on Mac) when you provide your own. UI tests can find the
+sheet by the accessibility identifier `paywall.sheet`.
 
-`onDismiss` runs for both a cancel and a completed purchase. Read your own entitlement afterwards to
-tell them apart.
+`onDismiss` runs when the user taps the close button (or presses Esc on Mac), when the thank-you
+celebration ends after a purchase or restore, and when the paywall finds access already active.
+Read your own entitlement afterwards to tell them apart. On iOS a swipe-down closes the sheet
+without calling it, so put work that must run on every close in the sheet's own `onDismiss`.
 
 ### The copy
 
 The kit ships no strings. `strings` returns your app's text for every `PaywallString`, so the
 paywall names your subscription and localizes with the rest of your app. An exhaustive `switch`
-makes the compiler flag any case you miss. This English copy is a starting point:
+makes the compiler flag any case you miss, including cases a minor release adds (1.2.0 added
+`.benefitsSubtitle`). Keep the function `nonisolated`: the parameter is `@Sendable`, and new Xcode app
+targets default to main-actor isolation. This English copy is a starting point:
 
 ```swift
 import PaywallKit
 
-@Sendable
-func paywallText(_ string: PaywallString) -> String {
+nonisolated func paywallText(_ string: PaywallString) -> String {
     switch string {
     case .benefitsHeader: String(localized: "Everything in Premium")
     case .benefitsSubtitle: ""
@@ -124,7 +158,17 @@ func paywallText(_ string: PaywallString) -> String {
 
 Conform your store to `PaywallService`. `entitlement` must live on an `@Observable` type: the
 paywall watches it to celebrate an approval that arrives while it is open and to close itself when
-access is already active. A minimal StoreKit 2 conformance:
+access is already active. If `entitlement` is `.entitled` when the paywall appears, it closes at
+once. A change from `.free` to `.entitled` while it is open plays the celebration; a change from
+`.unknown` straight to `.entitled` closes it without one, so settle `.unknown` to `.free` before
+presenting.
+
+The kit calls `loadProducts(forceRefresh: false)` when it appears and `forceRefresh: true` from Try
+Again, then reads `products` and `canMakePayments`. An empty `products` shows
+`.plansUnavailableTitle`; `canMakePayments == false` shows `.paymentsUnavailableTitle`. Plans render
+in monthly, yearly, lifetime order, with yearly selected first when it is offered.
+
+A minimal StoreKit 2 conformance:
 
 ```swift
 import PaywallKit
@@ -195,14 +239,24 @@ final class Store: PaywallService {
 }
 ```
 
-A real app also calls `refreshEntitlement()` at launch and listens to `Transaction.updates`.
+A real app also calls `refreshEntitlement()` at launch, so `entitlement` is `.free` rather than
+`.unknown` when the paywall opens, and listens to `Transaction.updates`.
 Fill `introductoryOfferText` ("7 days free") and `isEligibleForIntroOffer` from
 `product.subscription` to get the trial call to action and the App Store's required
-trial-conversion disclosure, and `monthlyEquivalentPrice` to show the yearly plan per month. The
-yearly plan's savings badge is computed from `price`.
+trial-conversion disclosure, and `monthlyEquivalentPrice` to show the yearly plan per month.
+Trials apply to monthly and yearly only. The yearly plan's savings badge compares its `price` with
+twelve times the monthly plan's `price`, rounded down. It is hidden when either plan is missing,
+when either price is 0 (the default), or when the saving is under 1%.
 
-Throw `PaywallError` for a specific alert. `.cancelled`, `CancellationError` and
-`StoreKitError.userCancelled` are silent; any other error shows the generic failure.
+From `purchase(_:)`, throw a `PaywallError` for a specific alert: `.pending` (Ask to Buy; the
+button stays disabled while the paywall is open), `.paymentsNotAllowed` (also replaces the plans
+with `.paymentsUnavailableTitle`), `.productNotFound`, `.verificationFailed` or `.notActivated`.
+`.failed` and any other error show `.purchaseFailed`. `.cancelled`, `CancellationError` and
+`StoreKitError.userCancelled` are silent. If `entitlement` is already `.entitled` when
+`purchase(_:)` throws, the paywall celebrates instead.
+
+From `restorePurchases()`, cancellation is silent, any other error shows `.restoreFailed`, and
+returning without `.entitled` shows `.nothingToRestore`, so update `entitlement` before returning.
 
 ## Scope
 
@@ -212,10 +266,11 @@ Throw `PaywallError` for a specific alert. `.cancelled`, `CancellationError` and
 
 ## Accessibility
 
-VoiceOver reads each plan as one element with its price, trial disclosure and savings, and marks
-the selection with a trait. The thank-you title is announced. Accessibility text sizes switch to a
-scrolling layout. Reduce Motion removes decorative motion, turns the celebration into a crossfade
-and keeps every haptic.
+VoiceOver reads each plan as one button: its name, its price (or, with a trial, the trial
+disclosure, which includes the price) and any savings, and marks the selected plan with the
+Selected trait. The highlighted benefit adds `.highlightedBenefit` to its label, and the thank-you
+title is announced. Accessibility text sizes switch to a scrolling layout. Reduce Motion removes
+decorative motion, shows the celebration without animation, and keeps every haptic.
 
 ## Local development
 
@@ -228,6 +283,9 @@ swift test
 ```sh
 xcodebuild -scheme PaywallKit -destination 'generic/platform=iOS Simulator' build
 ```
+
+The README media was captured from the iOS 27.2 Simulator (iPhone 17 Pro, iPad Pro 11-inch)
+and a macOS window, with a fake `PaywallService` whose purchase succeeds.
 
 ## License
 
