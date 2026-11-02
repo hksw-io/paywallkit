@@ -45,10 +45,10 @@ Not Now.
 ## Installation
 
 ```swift
-.package(url: "https://github.com/hksw-io/paywallkit.git", from: "1.2.0")
+.package(url: "https://github.com/hksw-io/paywallkit.git", from: "1.3.0")
 ```
 
-Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and choose **Up to Next Major Version** from `1.2.0`.
+Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and choose **Up to Next Major Version** from `1.3.0`.
 
 ## Usage
 
@@ -77,7 +77,8 @@ import SwiftUI
 `highlightedBenefitID` names the feature the user just tried to use; that row is tinted and
 announced. Set `brand` and `brandLight` to your brand colours (both default to the accent colour),
 pass `wallpaperSymbols` for a faint tiled backdrop, and forward your app's haptics preference as
-`hapticsEnabled`. `animatesDecorations: false` stops the celebration's breathing icon and drifting
+`hapticsEnabled`. Set `loadingPlanCount` if you sell fewer than three plans, so the loading
+placeholder is as tall as the plans that replace it. `animatesDecorations: false` stops the celebration's breathing icon and drifting
 backdrop and the loading shimmer, for example under UI tests. The highlighted row's halo and the
 purchase button's arrow keep moving; only Reduce Motion stops them. Pass `showsDismissButton: false`
 to hide the kit's close button (Not Now on Mac) when you provide your own. UI tests can find the

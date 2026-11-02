@@ -6,6 +6,16 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-02
+
+### Added
+
+- `loadingPlanCount` on `PaywallView`: how many plans the app sells. It defaults to 3, so apps that sell fewer should pass their count.
+
+### Fixed
+
+- The sheet changed height when the plans finished loading or failed to load. The placeholder now measures like the plans, and what replaces it keeps its height.
+
 ## [1.2.0] - 2026-10-06
 
 ### Added

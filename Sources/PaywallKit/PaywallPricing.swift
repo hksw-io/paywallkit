@@ -3,14 +3,16 @@ import SwiftUI
 
 struct PaywallPricing: View {
     let model: PaywallModel
+    let loadingPlanCount: Int
 
     @Environment(\.paywallHapticsEnabled) private var hapticEnabled
     @Environment(\.paywallStrings) private var strings
+    @State private var loadingHeight: CGFloat = 0
 
     var body: some View {
         Group {
             if self.model.isLoadingProducts {
-                PaywallPricingSkeleton()
+                PaywallPricingSkeleton(planCount: self.loadingPlanCount)
             } else if self.model.paymentsUnavailable {
                 PaywallPricingMessage(
                     title: self.strings(.paymentsUnavailableTitle),
@@ -29,6 +31,15 @@ struct PaywallPricing: View {
                 }
             }
         }
+        // The sheet fits its content, so whatever replaces the skeleton keeps its height.
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.size.height
+        } action: { height in
+            if self.model.isLoadingProducts {
+                self.loadingHeight = height
+            }
+        }
+        .frame(minHeight: self.loadingHeight)
         .sensoryFeedback(.selection, trigger: self.model.selectedPlan) { _, _ in self.hapticEnabled }
     }
 }
@@ -236,7 +247,7 @@ private struct PaywallPricingMessage: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
+        .padding(.vertical, 8)
     }
 }
 #endif

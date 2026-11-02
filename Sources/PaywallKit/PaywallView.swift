@@ -12,6 +12,7 @@ public struct PaywallView: View {
     let hapticsEnabled: Bool
     let animatesDecorations: Bool
     let showsDismissButton: Bool
+    let loadingPlanCount: Int
     let onDismiss: () -> Void
 
     @State private var model: PaywallModel
@@ -34,6 +35,8 @@ public struct PaywallView: View {
     ///   - wallpaperSymbols: SF Symbols tiled faintly behind the sheet; empty draws none.
     ///   - hapticsEnabled: Pass the app's haptics preference; system settings still apply.
     ///   - animatesDecorations: Pass `false` to still ambient loops, for example under UI tests.
+    ///   - loadingPlanCount: How many plans the app sells, so the loading placeholder is as tall
+    ///     as the plans that replace it.
     public init(
         service: some PaywallService,
         icon: Image,
@@ -48,6 +51,7 @@ public struct PaywallView: View {
         hapticsEnabled: Bool = true,
         animatesDecorations: Bool = true,
         showsDismissButton: Bool = true,
+        loadingPlanCount: Int = 3,
         onDismiss: @escaping () -> Void)
     {
         self._model = State(initialValue: PaywallModel(service: service))
@@ -62,6 +66,7 @@ public struct PaywallView: View {
         self.hapticsEnabled = hapticsEnabled
         self.animatesDecorations = animatesDecorations
         self.showsDismissButton = showsDismissButton
+        self.loadingPlanCount = loadingPlanCount
         self.onDismiss = onDismiss
     }
 
@@ -206,7 +211,7 @@ public struct PaywallView: View {
 
             Spacer(minLength: spacing)
 
-            PaywallPricing(model: self.model)
+            PaywallPricing(model: self.model, loadingPlanCount: self.loadingPlanCount)
                 .padding(.horizontal, PaywallMetrics.horizontalPadding)
         }
         .padding(.bottom, spacing)
