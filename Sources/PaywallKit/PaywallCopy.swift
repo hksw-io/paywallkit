@@ -36,8 +36,11 @@ enum PaywallCopy {
         guard monthlyPrice > 0, yearlyPrice > 0 else { return nil }
         let yearOfMonthly = monthlyPrice * 12
         guard yearOfMonthly > yearlyPrice else { return nil }
-        let fraction = (yearOfMonthly - yearlyPrice) / yearOfMonthly
-        let percent = Int((NSDecimalNumber(decimal: fraction).doubleValue * 100).rounded(.down))
+        // Rounded down in Decimal: through Double, an exact 29% comes out as 28.999… and shows 28.
+        var exact = (yearOfMonthly - yearlyPrice) * 100 / yearOfMonthly
+        var rounded = Decimal()
+        NSDecimalRound(&rounded, &exact, 0, .down)
+        let percent = NSDecimalNumber(decimal: rounded).intValue
         guard percent >= 1 else { return nil }
         return percent
     }

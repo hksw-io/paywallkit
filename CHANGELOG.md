@@ -6,6 +6,10 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The yearly savings badge could show one percent too little: monthly 10 and yearly 85.20 showed 28% for an exact 29%. The percentage is now rounded down in `Decimal`.
+
 ## [1.3.0] - 2026-11-02
 
 ### Added

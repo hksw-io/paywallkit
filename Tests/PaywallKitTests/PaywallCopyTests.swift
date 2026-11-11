@@ -103,18 +103,23 @@ struct PaywallCopyTests {
         #expect(PaywallCopy.badge(for: .yearly, products: noSaving) == nil)
     }
 
+    /// Prices are strings: a `Decimal` float literal goes through `Double` and is no longer exact.
     @Test(arguments: [
-        (2.99, 29.99, Optional(16)),
-        (4.99, 39.99, 33),
-        (10, 81, 32),
-        (1, 12, nil),
-        (1, 13, nil),
-        (0, 29.99, nil),
-        (2.99, 0, nil),
-        (10, 119.99, nil),
+        ("2.99", "29.99", Optional(16)),
+        ("4.99", "39.99", 33),
+        ("10", "81", 32),
+        ("10", "85.2", 29),
+        ("25", "213", 29),
+        ("1", "12", nil),
+        ("1", "13", nil),
+        ("0", "29.99", nil),
+        ("2.99", "0", nil),
+        ("10", "119.99", nil),
     ])
-    func `calculates yearly savings`(monthlyPrice: Decimal, yearlyPrice: Decimal, expected: Int?) {
-        #expect(PaywallCopy.yearlySavingsPercent(monthlyPrice: monthlyPrice, yearlyPrice: yearlyPrice) == expected)
+    func `calculates yearly savings`(monthlyPrice: String, yearlyPrice: String, expected: Int?) throws {
+        let monthly = try #require(Decimal(string: monthlyPrice))
+        let yearly = try #require(Decimal(string: yearlyPrice))
+        #expect(PaywallCopy.yearlySavingsPercent(monthlyPrice: monthly, yearlyPrice: yearly) == expected)
     }
 
     @Test
