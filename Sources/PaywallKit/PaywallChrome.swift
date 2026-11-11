@@ -283,6 +283,9 @@ struct PaywallPurchaseButton: View {
         .tint(.accentColor)
         .disabled(!self.model.isPurchaseButtonEnabled)
         .allowsHitTesting(!self.model.isRestoring)
+        #if os(macOS)
+            .keyboardShortcut(.defaultAction)
+        #endif
         .sensoryFeedback(.success, trigger: self.phase == .success) { _, isSuccess in
             self.hapticEnabled && isSuccess
         }

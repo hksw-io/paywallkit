@@ -6,6 +6,10 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- On Mac the purchase button is the sheet's default button, so Return presses it.
+
 ### Changed
 
 - A plan with an eligible intro offer shows `introductoryOfferText` as an outlined badge beside its name and keeps its billing line underneath; before, the trial text replaced the billing line. On a card too narrow for the savings and trial badges together, the trial badge drops under the name. VoiceOver reads a plan as its name, price, billing line, savings and trial; the trial disclosure stays in the caption under the purchase button. A lifetime product never shows a trial badge.
