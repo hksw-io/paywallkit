@@ -156,6 +156,13 @@ final class PaywallModel {
         }
     }
 
+    /// Ends the thank-you early and closes the paywall.
+    func skipCelebration() {
+        guard self.isThanking, !self.shouldDismiss else { return }
+        self.celebration?.cancel()
+        self.shouldDismiss = true
+    }
+
     func entitlementGranted() {
         guard !self.isPurchasing, !self.isRestoring else { return }
         self.finishPurchase()

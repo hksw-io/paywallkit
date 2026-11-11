@@ -245,10 +245,30 @@ public struct PaywallView: View {
         ZStack {
             if self.model.isThanking {
                 PaywallThanksView(icon: self.iconView, didRestore: self.model.didRestore, lines: self.thanksLines)
+                    .contentShape(.rect)
+                    .onTapGesture { self.model.skipCelebration() }
+                    .accessibilityAction(.escape) { self.model.skipCelebration() }
+                #if os(macOS)
+                    .background { self.skipShortcuts }
+                #endif
                     .transition(.opacity)
             }
         }
         .animation(self.reduceMotion ? nil : Tokens.Animations.thanksCenter, value: self.model.isThanking)
     }
+
+    #if os(macOS)
+        /// Return and Escape end the thank-you early. The buttons draw nothing.
+        private var skipShortcuts: some View {
+            Group {
+                Button(action: self.model.skipCelebration) { EmptyView() }
+                    .keyboardShortcut(.defaultAction)
+                Button(action: self.model.skipCelebration) { EmptyView() }
+                    .keyboardShortcut(.cancelAction)
+            }
+            .buttonStyle(.plain)
+            .accessibilityHidden(true)
+        }
+    #endif
 }
 #endif

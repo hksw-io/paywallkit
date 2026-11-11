@@ -89,6 +89,8 @@ sheet by the accessibility identifier `paywall.sheet`.
 
 `onDismiss` runs when the user taps the close button (or presses Esc on Mac), when the thank-you
 celebration ends after a purchase or restore, and when the paywall finds access already active.
+The celebration ends by itself after a few seconds; a tap on it, or Return or Esc on Mac, ends it
+at once.
 Read your own entitlement afterwards to tell them apart. On iOS a swipe-down closes the sheet
 without calling it, so put work that must run on every close in the sheet's own `onDismiss`.
 While a purchase runs the sheet cannot be swiped away. On Mac, Return presses the purchase button.

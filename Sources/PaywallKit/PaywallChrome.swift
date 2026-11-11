@@ -246,7 +246,8 @@ struct PaywallPurchaseButton: View {
         .disabled(!self.model.isPurchaseButtonEnabled)
         .allowsHitTesting(!self.model.isRestoring)
         #if os(macOS)
-            .keyboardShortcut(.defaultAction)
+            // After a purchase, Return belongs to the thank-you, which it ends early.
+            .keyboardShortcut(self.model.didSucceed ? nil : .defaultAction)
         #endif
         .sensoryFeedback(.success, trigger: self.phase == .success) { _, isSuccess in
             self.hapticEnabled && isSuccess

@@ -407,6 +407,30 @@ struct PaywallModelTests {
         #expect(self.sleeps.durations == [.zero, PaywallModel.thanksDwellReduced])
     }
 
+    @Test
+    func `skipping the thank-you dismisses without waiting for it to end`() async {
+        let service = FakePaywallService()
+        service.productsToReturn = [Self.product(.yearly)]
+        let dwell = PaywallModel.thanksDwell
+        let model = PaywallModel(service: service) { duration in
+            if duration == dwell {
+                try await Task.sleep(for: .seconds(60))
+            }
+        }
+
+        await model.purchase()
+        model.skipCelebration()
+        #expect(!model.shouldDismiss, "nothing to skip before the thank-you shows")
+
+        await self.settle { model.isThanking }
+        #expect(!model.shouldDismiss)
+
+        model.skipCelebration()
+        #expect(model.shouldDismiss)
+        await model.celebration?.value
+        #expect(model.celebration?.isCancelled == true)
+    }
+
     @Test(arguments: [
         PaywallError.cancelled as any Error,
         StoreKitError.userCancelled,
