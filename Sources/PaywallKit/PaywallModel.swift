@@ -28,7 +28,9 @@ final class PaywallModel {
     var isRestoring = false
     var didSucceed = false
     var didRestore = false
-    var alert: Alert?
+    /// What the alert shows. It stays after the alert closes, so its text holds while it fades.
+    private(set) var alert: Alert?
+    var isAlertPresented = false
     var shouldDismiss = false
     var isThanking = false
     /// The first load has not returned, or a retry is running.
@@ -154,10 +156,6 @@ final class PaywallModel {
         }
     }
 
-    func dismissAlert() {
-        self.alert = nil
-    }
-
     func entitlementGranted() {
         guard !self.isPurchasing, !self.isRestoring else { return }
         self.finishPurchase()
@@ -185,7 +183,9 @@ final class PaywallModel {
         if case .paymentsNotAllowed = error as? PaywallError {
             self.paymentsRefused = true
         }
-        self.alert = Self.alert(for: error)
+        if let alert = Self.alert(for: error) {
+            self.present(alert)
+        }
     }
 
     func restoreFinished(_ entitlement: PaywallEntitlement) {
@@ -194,7 +194,7 @@ final class PaywallModel {
         if entitlement == .entitled {
             self.finishPurchase(restored: true)
         } else {
-            self.alert = Alert(title: .nothingToRestoreTitle, message: .nothingToRestore)
+            self.present(Alert(title: .nothingToRestoreTitle, message: .nothingToRestore))
         }
     }
 
@@ -206,7 +206,12 @@ final class PaywallModel {
         guard !self.didSucceed else { return }
         self.isRestoring = false
         guard !Self.isCancellation(error) else { return }
-        self.alert = Alert(title: .restoreFailedTitle, message: .restoreFailed)
+        self.present(Alert(title: .restoreFailedTitle, message: .restoreFailed))
+    }
+
+    private func present(_ alert: Alert) {
+        self.alert = alert
+        self.isAlertPresented = true
     }
 
     private func loadProducts(forceRefresh: Bool) async {
@@ -243,7 +248,7 @@ final class PaywallModel {
         self.isPurchasing = false
         self.isRestoring = false
         self.isPurchasePending = false
-        self.alert = nil
+        self.isAlertPresented = false
         self.didRestore = restored
         self.didSucceed = true
         self.celebrate()

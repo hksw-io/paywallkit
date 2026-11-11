@@ -127,20 +127,12 @@ public struct PaywallView: View {
             }
             .alert(
                 self.strings(self.model.alert?.title ?? .purchaseFailedTitle),
-                isPresented: .init(
-                    get: { self.model.alert != nil },
-                    set: {
-                        if !$0 {
-                            self.model.dismissAlert()
-                        }
-                    })) {
-                Button(self.strings(.ok)) {
-                    self.model.dismissAlert()
-                }
-            } message: {
-                if let alert = self.model.alert {
-                    Text(self.strings(alert.message))
-                }
+                isPresented: self.$model.isAlertPresented,
+                presenting: self.model.alert)
+            { _ in
+                Button(self.strings(.ok)) {}
+            } message: { alert in
+                Text(self.strings(alert.message))
             }
             .environment(\.paywallBrand, self.brand)
             .environment(\.paywallHapticsEnabled, self.hapticsEnabled)

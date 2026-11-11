@@ -372,8 +372,7 @@ struct PaywallModelTests {
         #expect(model.alert == PaywallModel.Alert(title: .paymentsUnavailableTitle, message: .paymentsUnavailableMessage))
         #expect(model.paymentsUnavailable)
 
-        model.dismissAlert()
-        #expect(model.alert == nil)
+        model.isAlertPresented = false
         #expect(model.paymentsUnavailable)
         #expect(!model.canPurchase)
     }
@@ -420,7 +419,7 @@ struct PaywallModelTests {
 
         await model.purchase()
         #expect(!model.isPurchasing)
-        #expect(model.alert == nil)
+        #expect(!model.isAlertPresented)
         #expect(!model.shouldDismiss)
     }
 
@@ -437,6 +436,7 @@ struct PaywallModelTests {
 
         await model.purchase()
         #expect(!model.isPurchasing)
+        #expect(model.isAlertPresented)
         #expect(model.alert == PaywallModel.Alert(title: .purchaseFailedTitle, message: message))
     }
 
@@ -460,8 +460,8 @@ struct PaywallModelTests {
 
         await model.appear()
         await model.purchase()
-        #expect(model.alert != nil)
-        model.dismissAlert()
+        #expect(model.isAlertPresented)
+        model.isAlertPresented = false
         #expect(model.isPurchasePending)
         #expect(!model.canPurchase)
 
@@ -487,11 +487,18 @@ struct PaywallModelTests {
     }
 
     @Test
-    func `dismiss error clears alert`() {
-        let model = self.makeModel()
-        model.alert = PaywallModel.Alert(title: .purchaseFailedTitle, message: .purchaseFailed)
-        model.dismissAlert()
-        #expect(model.alert == nil)
+    func `a success closes an open alert and keeps its text while it fades`() async {
+        let service = FakePaywallService()
+        service.restoreError = TestError()
+        let model = self.makeModel(service: service)
+
+        await model.restore()
+        #expect(model.isAlertPresented)
+
+        model.entitlementGranted()
+        #expect(!model.isAlertPresented)
+        #expect(model.alert == PaywallModel.Alert(title: .restoreFailedTitle, message: .restoreFailed))
+        await model.celebration?.value
     }
 
     @Test
@@ -540,7 +547,7 @@ struct PaywallModelTests {
 
         await model.restore()
         #expect(!model.isRestoring)
-        #expect(model.alert == nil)
+        #expect(!model.isAlertPresented)
     }
 
     @Test
