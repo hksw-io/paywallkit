@@ -1,23 +1,18 @@
 #if os(iOS) || os(macOS)
 import SwiftUI
 
-struct PaywallParticle: Identifiable {
-    let id = UUID()
-    var x: CGFloat
-    var y: CGFloat
-    var scale: CGFloat
-    var opacity: Double
-    var symbol: String
-}
+/// Twelve sparkles spaced evenly on a ring around the hero icon. The radius is in icon sizes.
+private let heroParticles: [(radius: CGFloat, scale: CGFloat, opacity: Double)] = [
+    (0.66, 0.90, 0.55), (0.74, 0.60, 0.35), (0.63, 0.75, 0.65), (0.77, 0.55, 0.40),
+    (0.69, 1.00, 0.50), (0.72, 0.65, 0.30), (0.64, 0.80, 0.60), (0.78, 0.50, 0.45),
+    (0.67, 0.95, 0.70), (0.75, 0.70, 0.35), (0.62, 0.60, 0.55), (0.71, 0.85, 0.40),
+]
+private let heroParticleSymbols = ["sparkle", "star.fill", "circle.fill"]
 
 struct PaywallHeroIcon<Icon: View>: View {
     enum Mode {
         case ambient
         case celebration
-    }
-
-    private static var particleCount: Int {
-        12
     }
 
     let icon: Icon
@@ -32,7 +27,6 @@ struct PaywallHeroIcon<Icon: View>: View {
     @State private var float: CGFloat = 0
     @State private var pulse: CGFloat = 1
     @State private var pop: CGFloat = 1
-    @State private var particles: [PaywallParticle] = []
 
     private var cornerRadius: CGFloat {
         self.size * 0.23
@@ -52,10 +46,6 @@ struct PaywallHeroIcon<Icon: View>: View {
 
     private var particleSize: CGFloat {
         max(7, self.size * 0.16)
-    }
-
-    private var particleRadiusRange: ClosedRange<CGFloat> {
-        (self.size * 0.62) ... (self.size * 0.78)
     }
 
     var body: some View {
@@ -81,7 +71,6 @@ struct PaywallHeroIcon<Icon: View>: View {
         .scaleEffect(self.pop)
         .offset(y: self.float)
         .task {
-            self.seedParticles()
             guard !self.reduceMotion, self.decorativeMotionEnabled else { return }
             if case .celebration = self.mode {
                 await self.startCelebration()
@@ -134,48 +123,21 @@ struct PaywallHeroIcon<Icon: View>: View {
 
     private var particlesLayer: some View {
         ZStack {
-            if self.particles.count == Self.particleCount {
-                self.particleView(0)
-                self.particleView(1)
-                self.particleView(2)
-                self.particleView(3)
-                self.particleView(4)
-                self.particleView(5)
-                self.particleView(6)
-                self.particleView(7)
-                self.particleView(8)
-                self.particleView(9)
-                self.particleView(10)
-                self.particleView(11)
+            ForEach(heroParticles.indices, id: \.self) { index in
+                let particle = heroParticles[index]
+                let angle = Double(index) / Double(heroParticles.count) * 2 * .pi
+                let radius = particle.radius * self.size
+
+                Image(systemName: heroParticleSymbols[index % heroParticleSymbols.count])
+                    .font(.system(size: self.particleSize, weight: .medium))
+                    .foregroundStyle(self.brand.gradient)
+                    .opacity(particle.opacity)
+                    .scaleEffect(particle.scale)
+                    .offset(x: cos(angle) * radius, y: sin(angle) * radius)
             }
         }
         .frame(width: self.frameSize, height: self.frameSize)
-    }
-
-    private func particleView(_ index: Int) -> some View {
-        let particle = self.particles[index]
-        return Image(systemName: particle.symbol)
-            .font(.system(size: self.particleSize, weight: .medium))
-            .foregroundStyle(self.brand.gradient)
-            .opacity(particle.opacity)
-            .scaleEffect(particle.scale)
-            .offset(x: particle.x, y: particle.y)
-            .accessibilityHidden(true)
-    }
-
-    private func seedParticles() {
-        guard self.particles.isEmpty else { return }
-        let symbols = ["sparkle", "star.fill", "circle.fill"]
-        self.particles = (0 ..< Self.particleCount).map { index in
-            let angle = (Double(index) / Double(Self.particleCount)) * 2.0 * .pi
-            let radius = CGFloat.random(in: self.particleRadiusRange)
-            return PaywallParticle(
-                x: cos(angle) * radius,
-                y: sin(angle) * radius,
-                scale: CGFloat.random(in: 0.5 ... 1.0),
-                opacity: Double.random(in: 0.3 ... 0.7),
-                symbol: symbols[index % symbols.count])
-        }
+        .accessibilityHidden(true)
     }
 
     private func startCelebration() async {
