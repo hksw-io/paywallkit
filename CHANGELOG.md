@@ -13,6 +13,7 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ### Fixed
 
+- At accessibility text sizes the purchase button scrolled with the content and started below the fold. It now stays pinned at the bottom; its caption and the footer links scroll.
 - Try Again gave no sign that plans were reloading. It now shows the loading placeholder until the load returns, and further taps are ignored meanwhile.
 - The yearly savings badge could show one percent too little: monthly 10 and yearly 85.20 showed 28% for an exact 29%. The percentage is now rounded down in `Decimal`.
 - The backdrop glow ignored `brand` and `brandLight` and was always the accent colour and blue. It now uses the brand colours, which default to the accent colour.

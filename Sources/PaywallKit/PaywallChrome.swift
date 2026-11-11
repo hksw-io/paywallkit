@@ -200,9 +200,8 @@ enum PaywallTitleStyle {
         endPoint: .trailing)
 }
 
-struct PaywallActionFooter: View {
+struct PaywallPurchaseButton: View {
     let model: PaywallModel
-    let privacyPolicy: URL
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -236,48 +235,8 @@ struct PaywallActionFooter: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            self.ctaButton
-                .padding(.horizontal, PaywallMetrics.horizontalPadding)
-
-            Group {
-                if self.model.isPurchasePending {
-                    Text(self.strings(.pending))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                } else if self.model.isPurchasing {
-                    self.caption(self.strings(.purchasing), style: .primary)
-                } else {
-                    self.caption(
-                        self.strings(
-                            PaywallCopy.reassurance(for: self.model.selectedPlan, product: self.model.selectedProduct)),
-                        style: .secondary)
-                }
-            }
-            .padding(.top, 6)
+        self.ctaButton
             .padding(.horizontal, PaywallMetrics.horizontalPadding)
-
-            PaywallFooterLinks(model: self.model, privacyPolicy: self.privacyPolicy)
-                .padding(.top, 8)
-        }
-        .padding(.bottom, 12)
-    }
-
-    @ViewBuilder
-    private func caption(_ text: String, style: HierarchicalShapeStyle) -> some View {
-        let copy = Text(text)
-            .font(.caption)
-            .foregroundStyle(style)
-            .multilineTextAlignment(.center)
-            .fixedSize(horizontal: false, vertical: true)
-
-        if self.dynamicTypeSize.isAccessibilitySize {
-            copy
-        } else {
-            copy.lineLimit(2, reservesSpace: true)
-        }
     }
 
     private var ctaButton: some View {
@@ -326,6 +285,57 @@ struct PaywallActionFooter: View {
         .allowsHitTesting(!self.model.isRestoring)
         .sensoryFeedback(.success, trigger: self.phase == .success) { _, isSuccess in
             self.hapticEnabled && isSuccess
+        }
+    }
+}
+
+/// The caption under the purchase button, and the footer links.
+struct PaywallFooterDetails: View {
+    let model: PaywallModel
+    let privacyPolicy: URL
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.paywallStrings) private var strings
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Group {
+                if self.model.isPurchasePending {
+                    Text(self.strings(.pending))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else if self.model.isPurchasing {
+                    self.caption(self.strings(.purchasing), style: .primary)
+                } else {
+                    self.caption(
+                        self.strings(
+                            PaywallCopy.reassurance(for: self.model.selectedPlan, product: self.model.selectedProduct)),
+                        style: .secondary)
+                }
+            }
+            .padding(.top, 6)
+            .padding(.horizontal, PaywallMetrics.horizontalPadding)
+
+            PaywallFooterLinks(model: self.model, privacyPolicy: self.privacyPolicy)
+                .padding(.top, 8)
+        }
+        .padding(.bottom, 12)
+    }
+
+    @ViewBuilder
+    private func caption(_ text: String, style: HierarchicalShapeStyle) -> some View {
+        let copy = Text(text)
+            .font(.caption)
+            .foregroundStyle(style)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+
+        if self.dynamicTypeSize.isAccessibilitySize {
+            copy
+        } else {
+            copy.lineLimit(2, reservesSpace: true)
         }
     }
 }

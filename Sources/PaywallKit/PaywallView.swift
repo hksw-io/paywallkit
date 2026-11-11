@@ -167,10 +167,17 @@ public struct PaywallView: View {
                 VStack(spacing: 0) {
                     self.scrollableContent
 
-                    PaywallActionFooter(model: self.model, privacyPolicy: self.privacyPolicy)
+                    PaywallFooterDetails(model: self.model, privacyPolicy: self.privacyPolicy)
                 }
             }
             .scrollBounceBehavior(.basedOnSize)
+            // The purchase button stays on screen; its caption and the links scroll with the rest.
+            .safeAreaBar(edge: .bottom) {
+                PaywallPurchaseButton(model: self.model)
+                    .padding(.vertical, 12)
+            }
+            // A hard edge, or the plans show through around the button.
+            .scrollEdgeEffectStyle(.hard, for: .bottom)
         } else {
             VStack(spacing: 0) {
                 ViewThatFits(in: .vertical) {
@@ -184,7 +191,9 @@ public struct PaywallView: View {
                     .defaultScrollAnchor(.bottom, for: .initialOffset)
                 }
 
-                PaywallActionFooter(model: self.model, privacyPolicy: self.privacyPolicy)
+                PaywallPurchaseButton(model: self.model)
+
+                PaywallFooterDetails(model: self.model, privacyPolicy: self.privacyPolicy)
             }
         }
     }

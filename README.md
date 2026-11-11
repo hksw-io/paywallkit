@@ -278,8 +278,9 @@ returning without `.entitled` shows `.nothingToRestore`, so update `entitlement`
 VoiceOver reads each plan as one button: its name, its price (or, with a trial, the trial
 disclosure, which includes the price) and any savings, and marks the selected plan with the
 Selected trait. The highlighted benefit adds `.highlightedBenefit` to its label, and the thank-you
-title is announced. Accessibility text sizes switch to a scrolling layout. Reduce Motion removes
-decorative motion, shows the celebration without animation, and keeps every haptic.
+title is announced. Accessibility text sizes switch to a scrolling layout that keeps the purchase
+button pinned at the bottom. Reduce Motion removes decorative motion, shows the celebration without
+animation, and keeps every haptic.
 
 ## Local development
 
