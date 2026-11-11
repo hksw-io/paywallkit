@@ -9,6 +9,7 @@ All notable changes to PaywallKit are recorded here. The format follows
 ### Fixed
 
 - The yearly savings badge could show one percent too little: monthly 10 and yearly 85.20 showed 28% for an exact 29%. The percentage is now rounded down in `Decimal`.
+- The backdrop glow ignored `brand` and `brandLight` and was always the accent colour and blue. It now uses the brand colours, which default to the accent colour.
 
 ## [1.3.0] - 2026-11-02
 
