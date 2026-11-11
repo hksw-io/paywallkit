@@ -88,6 +88,7 @@ sheet by the accessibility identifier `paywall.sheet`.
 celebration ends after a purchase or restore, and when the paywall finds access already active.
 Read your own entitlement afterwards to tell them apart. On iOS a swipe-down closes the sheet
 without calling it, so put work that must run on every close in the sheet's own `onDismiss`.
+While a purchase runs the sheet cannot be swiped away.
 
 ### The copy
 

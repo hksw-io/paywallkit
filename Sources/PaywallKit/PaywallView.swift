@@ -93,6 +93,7 @@ public struct PaywallView: View {
             .presentationDetents([.large])
             .presentationSizing(.form.fitted(horizontal: false, vertical: true))
         #endif
+            .interactiveDismissDisabled(self.model.isPurchasing)
             .onChange(of: self.reduceMotion, initial: true) { _, reduceMotion in
                 self.model.reduceMotion = reduceMotion
             }

@@ -6,6 +6,10 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The sheet cannot be swiped away while a purchase runs. Apps no longer need their own `interactiveDismissDisabled` for that.
+
 ### Fixed
 
 - The yearly savings badge could show one percent too little: monthly 10 and yearly 85.20 showed 28% for an exact 29%. The percentage is now rounded down in `Decimal`.
