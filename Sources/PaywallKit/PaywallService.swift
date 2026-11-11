@@ -39,7 +39,8 @@ public struct PaywallProduct: Identifiable, Equatable, Sendable {
     public var displayPrice: String
     public var price: Decimal
     public var monthlyEquivalentPrice: String?
-    /// Short free-trial copy such as "7 days free", shown when the user is eligible.
+    /// Short free-trial copy such as "7 days free", shown as a badge on the plan when the user is
+    /// eligible.
     public var introductoryOfferText: String?
     public var isEligibleForIntroOffer: Bool
 
@@ -86,7 +87,7 @@ public enum PaywallString: Hashable, Sendable {
     case highlightedBenefit
     /// A plan's name, such as "Monthly".
     case plan(PaywallPlan)
-    /// A plan's billing line when no trial is offered, such as "Billed monthly" or "One-time purchase".
+    /// The billing line under a plan's name, such as "Billed monthly" or "One-time purchase".
     case billing(PaywallPlan)
     /// The yearly plan's savings badge, such as "Save 20%".
     case savePercent(Int)

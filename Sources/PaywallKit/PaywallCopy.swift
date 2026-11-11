@@ -21,15 +21,11 @@ enum PaywallCopy {
         }
     }
 
-    static func subtitle(
-        for plan: PaywallPlan,
-        product: PaywallProduct?,
-        strings: (PaywallString) -> String) -> String
-    {
-        if self.hasEligibleIntroOffer(product), let trial = product?.introductoryOfferText {
-            return trial
-        }
-        return strings(.billing(plan))
+    /// The short trial copy for a plan's badge. Like the call to action and the disclosure, it
+    /// applies to subscriptions only.
+    static func trialBadge(for product: PaywallProduct?) -> String? {
+        guard let product, product.plan != .lifetime, self.hasEligibleIntroOffer(product) else { return nil }
+        return product.introductoryOfferText
     }
 
     static func yearlySavingsPercent(monthlyPrice: Decimal, yearlyPrice: Decimal) -> Int? {
@@ -84,14 +80,16 @@ enum PaywallCopy {
     {
         var components = [strings(.plan(plan))]
 
-        if let disclosure = self.trialConversionDisclosure(for: product) {
-            components.append(strings(disclosure))
-        } else if let price = product?.displayPrice {
+        if let price = product?.displayPrice {
             components.append(price)
         }
+        components.append(strings(.billing(plan)))
 
         if let badge {
             components.append(strings(badge))
+        }
+        if let trial = self.trialBadge(for: product) {
+            components.append(trial)
         }
 
         return components.joined(separator: ", ")

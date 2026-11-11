@@ -91,17 +91,32 @@ private struct PaywallTierRadio: View {
     }
 }
 
-private struct PaywallSavingsBadge: View {
+private struct PaywallBadge: View {
     let text: String
+    /// Savings are filled and the trial is outlined, so the two read apart side by side.
+    var isFilled = true
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// Half a line's height or more, so one line is a capsule and wrapped text a rounded rectangle.
+    @ScaledMetric(relativeTo: .caption2) private var cornerRadius: CGFloat = 10
 
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: self.cornerRadius)
+
         Text(self.text)
             .font(.caption2.weight(.bold))
-            .foregroundStyle(.white)
-            .lineLimit(1)
+            .foregroundStyle(self.isFilled ? Color.white : Color.accentColor)
+            .lineLimit(self.dynamicTypeSize.isAccessibilitySize ? nil : 1)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
-            .background(Color.accentColor, in: .capsule)
+            .background {
+                if self.isFilled {
+                    shape.fill(Color.accentColor)
+                } else {
+                    shape.strokeBorder(Color.accentColor)
+                }
+            }
     }
 }
 
@@ -155,11 +170,8 @@ private struct PaywallTierCard: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     self.name
-
-                    if let badge = PaywallCopy.badge(for: self.tier, products: self.model.products) {
-                        PaywallSavingsBadge(text: self.strings(badge))
-                    }
-
+                    self.savingsBadge
+                    self.trialBadge
                     self.subtitle
 
                     self.priceBlock(alignment: .leading)
@@ -172,12 +184,16 @@ private struct PaywallTierCard: View {
                 PaywallTierRadio(isSelected: self.isSelected)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        self.name
-                            .layoutPriority(1)
+                    // On a card too narrow for both badges, the trial badge drops under the name.
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 6) {
+                            self.nameAndSavings
+                            self.trialBadge
+                        }
 
-                        if let badge = PaywallCopy.badge(for: self.tier, products: self.model.products) {
-                            PaywallSavingsBadge(text: self.strings(badge))
+                        VStack(alignment: .leading, spacing: 4) {
+                            self.nameAndSavings
+                            self.trialBadge
                         }
                     }
 
@@ -186,8 +202,33 @@ private struct PaywallTierCard: View {
 
                 Spacer()
 
+                // The billed amount takes the width it needs before the name and badges do.
                 self.priceBlock(alignment: .trailing)
+                    .layoutPriority(1)
             }
+        }
+    }
+
+    private var nameAndSavings: some View {
+        HStack(spacing: 6) {
+            self.name
+                .layoutPriority(1)
+
+            self.savingsBadge
+        }
+    }
+
+    @ViewBuilder
+    private var savingsBadge: some View {
+        if let badge = PaywallCopy.badge(for: self.tier, products: self.model.products) {
+            PaywallBadge(text: self.strings(badge))
+        }
+    }
+
+    @ViewBuilder
+    private var trialBadge: some View {
+        if let trial = PaywallCopy.trialBadge(for: self.product) {
+            PaywallBadge(text: trial, isFilled: false)
         }
     }
 
@@ -199,7 +240,7 @@ private struct PaywallTierCard: View {
     }
 
     private var subtitle: some View {
-        Text(PaywallCopy.subtitle(for: self.tier, product: self.product, strings: self.strings.lookup))
+        Text(self.strings(.billing(self.tier)))
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .lineLimit(self.dynamicTypeSize.isAccessibilitySize ? nil : 2)

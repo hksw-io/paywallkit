@@ -30,29 +30,27 @@ struct PaywallCopyTests {
     }
 
     @Test
-    func `without an offer each plan shows its billing line`() {
-        for plan in PaywallPlan.allCases {
-            #expect(PaywallCopy.subtitle(for: plan, product: Self.product(plan), strings: Self.strings)
-                == Self.strings(.billing(plan)))
-        }
+    func `an eligible intro offer is the plan's trial badge`() {
+        let trial = "7 days free"
+        #expect(PaywallCopy.trialBadge(for: Self.product(.monthly, trial: trial)) == trial)
+        #expect(PaywallCopy.trialBadge(for: Self.product(.yearly, trial: trial)) == trial)
     }
 
     @Test
-    func `an eligible intro offer replaces the billing subtitle`() {
-        let offered = Self.product(.yearly, price: 100, trial: "7 days free")
-        #expect(PaywallCopy.subtitle(for: .yearly, product: offered, strings: Self.strings) == "7 days free")
-    }
-
-    @Test
-    func `an ineligible offer falls back to the billing subtitle`() {
+    func `a plan without an eligible offer has no trial badge`() {
         let ineligible = PaywallProduct(
             plan: .yearly,
             displayPrice: "$9.99",
             introductoryOfferText: "7 days free",
             isEligibleForIntroOffer: false)
-        #expect(
-            PaywallCopy.subtitle(for: .yearly, product: ineligible, strings: Self.strings)
-                == Self.strings(.billing(.yearly)))
+        #expect(PaywallCopy.trialBadge(for: ineligible) == nil)
+        #expect(PaywallCopy.trialBadge(for: Self.product(.yearly)) == nil)
+        #expect(PaywallCopy.trialBadge(for: nil) == nil)
+    }
+
+    @Test
+    func `the lifetime plan never has a trial badge`() {
+        #expect(PaywallCopy.trialBadge(for: Self.product(.lifetime, trial: "7 days free")) == nil)
     }
 
     @Test
@@ -136,20 +134,36 @@ struct PaywallCopyTests {
     }
 
     @Test
-    func `the accessibility label names the plan, price and badge`() {
+    func `the accessibility label names the plan, price, billing line and savings`() {
         let label = PaywallCopy.accessibilityLabel(
             for: .yearly,
             product: Self.product(.yearly, price: 100),
             badge: .savePercent(17),
             strings: Self.strings)
 
-        #expect(label == [Self.strings(.plan(.yearly)), "$9.99", Self.strings(.savePercent(17))].joined(separator: ", "))
+        #expect(label == [
+            Self.strings(.plan(.yearly)), "$9.99", Self.strings(.billing(.yearly)), Self.strings(.savePercent(17)),
+        ].joined(separator: ", "))
+    }
+
+    @Test
+    func `the accessibility label ends with the trial badge`() {
+        let trial = "7 days free"
+        let label = PaywallCopy.accessibilityLabel(
+            for: .yearly,
+            product: Self.product(.yearly, price: 100, trial: trial),
+            badge: .savePercent(17),
+            strings: Self.strings)
+
+        #expect(label == [
+            Self.strings(.plan(.yearly)), "$9.99", Self.strings(.billing(.yearly)), Self.strings(.savePercent(17)), trial,
+        ].joined(separator: ", "))
     }
 
     @Test
     func `the accessibility label survives a missing product`() {
         let label = PaywallCopy.accessibilityLabel(for: .lifetime, product: nil, badge: nil, strings: Self.strings)
-        #expect(label == Self.strings(.plan(.lifetime)))
+        #expect(label == [Self.strings(.plan(.lifetime)), Self.strings(.billing(.lifetime))].joined(separator: ", "))
     }
 
 }

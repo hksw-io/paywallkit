@@ -251,9 +251,10 @@ final class Store: PaywallService {
 A real app also calls `refreshEntitlement()` at launch, so `entitlement` is `.free` rather than
 `.unknown` when the paywall opens, and listens to `Transaction.updates`.
 Fill `introductoryOfferText` ("7 days free") and `isEligibleForIntroOffer` from
-`product.subscription` to get the trial call to action and the App Store's required
-trial-conversion disclosure, and `monthlyEquivalentPrice` to show the yearly plan per month.
-Trials apply to monthly and yearly only. The yearly plan's savings badge compares its `price` with
+`product.subscription` to get a trial badge on the plan, the trial call to action and the App
+Store's required trial-conversion disclosure, and `monthlyEquivalentPrice` to show the yearly plan
+per month. The badge sits beside the plan's name; the billing line stays under it and the billed
+price stays the largest text on the card. Trials apply to monthly and yearly only. The yearly plan's savings badge compares its `price` with
 twelve times the monthly plan's `price`, rounded down. It is hidden when either plan is missing,
 when either price is 0 (the default), or when the saving is under 1%.
 
@@ -275,9 +276,9 @@ returning without `.entitled` shows `.nothingToRestore`, so update `entitlement`
 
 ## Accessibility
 
-VoiceOver reads each plan as one button: its name, its price (or, with a trial, the trial
-disclosure, which includes the price) and any savings, and marks the selected plan with the
-Selected trait. The highlighted benefit adds `.highlightedBenefit` to its label, and the thank-you
+VoiceOver reads each plan as one button: its name, price, billing line, any savings and any
+trial, and marks the selected plan with the Selected trait. The caption under the purchase button
+carries the selected plan's trial disclosure. The highlighted benefit adds `.highlightedBenefit` to its label, and the thank-you
 title is announced. Accessibility text sizes switch to a scrolling layout that keeps the purchase
 button pinned at the bottom. Reduce Motion removes decorative motion, shows the celebration without
 animation, and keeps every haptic.
