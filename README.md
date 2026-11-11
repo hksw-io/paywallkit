@@ -75,7 +75,10 @@ import SwiftUI
 ```
 
 `highlightedBenefitID` names the feature the user just tried to use; that row is tinted and
-announced. Set `brand` and `brandLight` to your brand colours (both default to the accent colour),
+announced. Pass `benefitsHeader` and `benefitsSubtitle` when one presentation needs its own heading
+or sentence, such as an onboarding offer or the reason the paywall appeared ("Subscribe to import
+these books."). Each replaces its `PaywallString` case for that presentation; `nil`, the default,
+uses `strings`, and an empty `benefitsSubtitle` shows no sentence. Set `brand` and `brandLight` to your brand colours (both default to the accent colour),
 pass `wallpaperSymbols` for a faint tiled backdrop, and forward your app's haptics preference as
 `hapticsEnabled`. Set `loadingPlanCount` if you sell fewer than three plans, so the loading
 placeholder is as tall as the plans that replace it. `animatesDecorations: false` stops the celebration's breathing icon and drifting

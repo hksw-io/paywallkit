@@ -79,9 +79,11 @@ public enum PaywallError: Error, Sendable, Equatable {
 /// Every piece of copy the paywall shows or speaks. The kit ships no strings: pass `PaywallView` a
 /// lookup that returns the app's localized text for each case.
 public enum PaywallString: Hashable, Sendable {
-    /// Heading above the benefits, such as "Everything in Premium".
+    /// Heading above the benefits, such as "Everything in Premium". `PaywallView`'s `benefitsHeader`
+    /// replaces it for one presentation.
     case benefitsHeader
-    /// A sentence under the heading; return an empty string to show none.
+    /// A sentence under the heading; return an empty string to show none. `PaywallView`'s
+    /// `benefitsSubtitle` replaces it for one presentation.
     case benefitsSubtitle
     /// Appended to the highlighted benefit for VoiceOver, such as "the feature you tried to use".
     case highlightedBenefit

@@ -3,23 +3,28 @@ import SwiftUI
 
 struct PaywallBenefitsSection: View {
     let benefits: [PaywallBenefit]
+    /// This presentation's own heading and sentence; `nil` falls back to the app's lookup.
+    let header: String?
+    let subtitle: String?
     let highlightedID: String?
 
     @Environment(\.paywallSheetHeight) private var sheetHeight
     @Environment(\.paywallStrings) private var strings
 
     var body: some View {
+        let subtitle = self.subtitle ?? self.strings(.benefitsSubtitle)
+
         VStack(alignment: .leading, spacing: Tokens.Spacing.medium) {
             VStack(spacing: Tokens.Spacing.xxSmall) {
-                Text(self.strings(.benefitsHeader))
+                Text(self.header ?? self.strings(.benefitsHeader))
                     .font(PaywallMetrics.titleFont(for: self.sheetHeight))
                     .foregroundStyle(PaywallTitleStyle.gradient)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
                     .accessibilityAddTraits(.isHeader)
 
-                if !self.strings(.benefitsSubtitle).isEmpty {
-                    Text(self.strings(.benefitsSubtitle))
+                if !subtitle.isEmpty {
+                    Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)

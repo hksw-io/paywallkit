@@ -4,6 +4,8 @@ import SwiftUI
 public struct PaywallView: View {
     let icon: Image
     let benefits: [PaywallBenefit]
+    let benefitsHeader: String?
+    let benefitsSubtitle: String?
     let highlightedBenefitID: String?
     let thanksLines: [Text]
     let privacyPolicy: URL
@@ -25,7 +27,11 @@ public struct PaywallView: View {
 
     /// - Parameters:
     ///   - icon: The app icon shown as the hero and in the thank-you celebration.
-    ///   - benefits: The rows under `.benefitsHeader`, in display order.
+    ///   - benefits: The rows under the heading, in display order.
+    ///   - benefitsHeader: The heading for this presentation. `nil` uses `.benefitsHeader` from
+    ///     `strings`.
+    ///   - benefitsSubtitle: The sentence under the heading for this presentation, such as why the
+    ///     paywall appeared. `nil` uses `.benefitsSubtitle` from `strings`; an empty string shows none.
     ///   - highlightedBenefitID: The benefit the user just tried to use; it is tinted and announced.
     ///   - thanksLines: App-specific lines under `.thanksTitle` after a purchase.
     ///   - privacyPolicy: Linked in the footer next to Apple's standard Terms of Use.
@@ -41,6 +47,8 @@ public struct PaywallView: View {
         service: some PaywallService,
         icon: Image,
         benefits: [PaywallBenefit],
+        benefitsHeader: String? = nil,
+        benefitsSubtitle: String? = nil,
         highlightedBenefitID: String? = nil,
         thanksLines: [Text],
         privacyPolicy: URL,
@@ -57,6 +65,8 @@ public struct PaywallView: View {
         self._model = State(initialValue: PaywallModel(service: service))
         self.icon = icon
         self.benefits = benefits
+        self.benefitsHeader = benefitsHeader
+        self.benefitsSubtitle = benefitsSubtitle
         self.highlightedBenefitID = highlightedBenefitID
         self.thanksLines = thanksLines
         self.privacyPolicy = privacyPolicy
@@ -216,7 +226,11 @@ public struct PaywallView: View {
 
             Spacer(minLength: spacing)
 
-            PaywallBenefitsSection(benefits: self.benefits, highlightedID: self.highlightedBenefitID)
+            PaywallBenefitsSection(
+                benefits: self.benefits,
+                header: self.benefitsHeader,
+                subtitle: self.benefitsSubtitle,
+                highlightedID: self.highlightedBenefitID)
                 .padding(.horizontal, PaywallMetrics.horizontalPadding)
 
             Spacer(minLength: spacing)
