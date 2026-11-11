@@ -45,10 +45,10 @@ Not Now.
 ## Installation
 
 ```swift
-.package(url: "https://github.com/hksw-io/paywallkit.git", from: "1.3.0")
+.package(url: "https://github.com/hksw-io/paywallkit.git", from: "1.4.0")
 ```
 
-Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and choose **Up to Next Major Version** from `1.3.0`.
+Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and choose **Up to Next Major Version** from `1.4.0`.
 
 ## Usage
 

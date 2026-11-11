@@ -6,6 +6,8 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-12
+
 ### Added
 
 - `benefitsHeader` and `benefitsSubtitle` on `PaywallView`: optional text for one presentation that replaces `.benefitsHeader` and `.benefitsSubtitle` from `strings`. Both default to `nil`, so existing call sites compile unchanged, and apps no longer need to wrap `strings` to vary the heading.
