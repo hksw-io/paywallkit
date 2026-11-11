@@ -27,7 +27,7 @@ struct PaywallPricingLayoutTests {
     @Test(arguments: [2, 3])
     func `plans arriving keep the height`(planCount: Int) async {
         let service = FakePaywallService()
-        service.productsToReturn = Array(self.products.prefix(planCount))
+        service.productsAfterLoad = Array(self.products.prefix(planCount))
         let model = PaywallModel(service: service)
         let view = self.host(model, loadingPlanCount: planCount)
         let loading = self.height(of: view)

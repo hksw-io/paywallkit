@@ -6,6 +6,10 @@ import Foundation
 /// `entitlement` must be read from an `@Observable` type: the paywall observes it to celebrate an
 /// approval that lands while it is open (Ask to Buy, another device) and to close itself when access
 /// turns out to be active already.
+///
+/// `products` and `canMakePayments` are read on every update, not copied. Keep them on the same
+/// `@Observable` type: plans the service already holds are on screen in the first frame, and a later
+/// change reaches the open paywall.
 @MainActor
 public protocol PaywallService: Sendable {
     var entitlement: PaywallEntitlement { get }

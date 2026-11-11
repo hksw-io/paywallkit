@@ -11,6 +11,8 @@ import Testing
 final class FakePaywallService: PaywallService {
     var entitlement: PaywallEntitlement
     var productsToReturn: [PaywallProduct] = []
+    /// What `loadProducts` fills in, for a service that starts empty.
+    var productsAfterLoad: [PaywallProduct]?
     var canMakePayments = true
     var purchaseError: Error?
     var restoreError: Error?
@@ -29,6 +31,9 @@ final class FakePaywallService: PaywallService {
 
     func loadProducts(forceRefresh _: Bool) async {
         self.loadProductsCallCount += 1
+        if let loaded = self.productsAfterLoad {
+            self.productsToReturn = loaded
+        }
     }
 
     func purchase(_ plan: PaywallPlan) async throws {
@@ -77,8 +82,7 @@ struct PaywallModelTests {
         let model = PaywallModel(service: service) { try await sleeps.sleep($0) }
         model.reduceMotion = reduceMotion
         if purchasable {
-            model.products = PaywallPlan.allCases.map(Self.product)
-            model.hasLoadedProducts = true
+            service.productsToReturn = PaywallPlan.allCases.map(Self.product)
         }
         return model
     }
@@ -146,7 +150,8 @@ struct PaywallModelTests {
 
     @Test
     func `the purchase button stays enabled through a purchase and disables when nothing can be bought`() {
-        let model = self.makeModel()
+        let service = FakePaywallService()
+        let model = self.makeModel(service: service)
         #expect(model.isPurchaseButtonEnabled)
         model.isPurchasing = true
         #expect(!model.canPurchase)
@@ -162,7 +167,7 @@ struct PaywallModelTests {
         model.isPurchasePending = true
         #expect(!model.isPurchaseButtonEnabled)
         model.isPurchasePending = false
-        model.products = []
+        service.productsToReturn = []
         #expect(!model.isPurchaseButtonEnabled)
         model.isRestoring = true
         #expect(!model.isPurchaseButtonEnabled)
@@ -186,7 +191,7 @@ struct PaywallModelTests {
     }
 
     @Test
-    func `on appear loads products into state`() async {
+    func `plans the service already holds show before anything loads`() {
         let yearly = PaywallProduct(
             plan: .yearly,
             displayPrice: "$59.99",
@@ -196,13 +201,64 @@ struct PaywallModelTests {
         service.productsToReturn = [yearly]
         let model = self.makeModel(service: service, purchasable: false)
 
+        #expect(!model.isLoadingProducts)
+        #expect(model.products == [yearly])
+        #expect(model.canPurchase)
+        #expect(service.loadProductsCallCount == 0)
+    }
+
+    @Test
+    func `an empty service shows the placeholder until its plans load`() async {
+        let yearly = Self.product(.yearly)
+        let service = FakePaywallService()
+        service.productsAfterLoad = [yearly]
+        let model = self.makeModel(service: service, purchasable: false)
+
         #expect(model.isLoadingProducts)
+        #expect(!model.productsUnavailable)
+        #expect(!model.canPurchase)
         await model.appear()
 
         #expect(model.products == [yearly])
         #expect(!model.isLoadingProducts)
+        #expect(model.canPurchase)
         #expect(service.loadProductsCallCount == 1)
         model.disappear()
+    }
+
+    @Test
+    func `plans the service changes later reach the paywall`() async {
+        let service = FakePaywallService()
+        service.productsToReturn = [Self.product(.yearly)]
+        let model = self.makeModel(service: service, purchasable: false)
+        await model.appear()
+
+        let changed = Mutex(false)
+        withObservationTracking {
+            _ = model.products
+        } onChange: {
+            changed.withLock { $0 = true }
+        }
+        let monthly = Self.product(.monthly)
+        service.productsToReturn = [monthly]
+
+        #expect(changed.withLock { $0 })
+        #expect(model.products == [monthly])
+        #expect(model.selectedPlan == .monthly)
+        model.disappear()
+    }
+
+    @Test
+    func `a chosen plan that is no longer offered falls back to yearly until it returns`() {
+        let service = FakePaywallService()
+        let model = self.makeModel(service: service)
+        model.select(.monthly)
+
+        service.productsToReturn = [Self.product(.lifetime), Self.product(.yearly)]
+        #expect(model.selectedPlan == .yearly)
+
+        service.productsToReturn = PaywallPlan.allCases.map(Self.product)
+        #expect(model.selectedPlan == .monthly)
     }
 
     @Test
@@ -233,6 +289,7 @@ struct PaywallModelTests {
         service.canMakePayments = false
         let model = self.makeModel(service: service, purchasable: false)
 
+        #expect(model.paymentsUnavailable)
         await model.appear()
         #expect(model.paymentsUnavailable)
         #expect(!model.productsUnavailable)
@@ -261,13 +318,13 @@ struct PaywallModelTests {
     @Test
     func `unavailable plan cannot be selected or purchased`() async {
         let service = FakePaywallService()
+        service.productsToReturn = [Self.product(.yearly)]
         let model = self.makeModel(service: service, purchasable: false)
-        model.productsLoaded([Self.product(.yearly)], canMakePayments: true)
 
         model.select(.monthly)
         #expect(model.selectedPlan == .yearly)
 
-        model.selectedPlan = .monthly
+        service.productsToReturn = []
         await model.purchase()
         #expect(service.purchasedPlans.isEmpty)
     }

@@ -21,7 +21,8 @@ final class PaywallModel {
     @ObservationIgnored private var entitlementObservation: Task<Void, Never>?
     @ObservationIgnored private(set) var celebration: Task<Void, Never>?
 
-    var selectedPlan: PaywallPlan = .yearly
+    /// The plan the user chose; `selectedPlan` falls back while the service does not offer it.
+    private var chosenPlan: PaywallPlan = .yearly
     var isPurchasePending = false
     var isPurchasing = false
     var isRestoring = false
@@ -30,9 +31,9 @@ final class PaywallModel {
     var alert: Alert?
     var shouldDismiss = false
     var isThanking = false
-    var products: [PaywallProduct] = []
     var hasLoadedProducts = false
-    var canMakePayments = true
+    /// A purchase reported `.paymentsNotAllowed` although the service allowed payments.
+    private var paymentsRefused = false
 
     init(
         service: any PaywallService,
@@ -42,16 +43,37 @@ final class PaywallModel {
         self.sleep = sleep
     }
 
+    /// The service's plans in display order. Read from the service on every access, so plans it
+    /// already holds are on screen in the first frame and later changes show up.
+    var products: [PaywallProduct] {
+        let offered = self.service.products
+        return PaywallPlan.allCases.compactMap { plan in
+            offered.first { $0.plan == plan }
+        }
+    }
+
+    var canMakePayments: Bool {
+        self.service.canMakePayments && !self.paymentsRefused
+    }
+
+    /// Yearly first; if the chosen plan is not offered, yearly, then the first plan that is.
+    var selectedPlan: PaywallPlan {
+        let products = self.products
+        return [self.chosenPlan, .yearly].first { plan in products.contains { $0.plan == plan } }
+            ?? products.first?.plan
+            ?? self.chosenPlan
+    }
+
     var paymentsUnavailable: Bool {
-        self.hasLoadedProducts && !self.canMakePayments
+        !self.isLoadingProducts && !self.canMakePayments
     }
 
     var productsUnavailable: Bool {
-        self.hasLoadedProducts && self.canMakePayments && self.products.isEmpty
+        !self.isLoadingProducts && self.canMakePayments && self.products.isEmpty
     }
 
     var isLoadingProducts: Bool {
-        !self.hasLoadedProducts
+        !self.hasLoadedProducts && self.products.isEmpty
     }
 
     var canPurchase: Bool {
@@ -104,7 +126,7 @@ final class PaywallModel {
     func select(_ plan: PaywallPlan) {
         guard self.canMakePayments, !self.isPurchasing, !self.didSucceed,
               self.product(for: plan) != nil else { return }
-        self.selectedPlan = plan
+        self.chosenPlan = plan
     }
 
     func purchase() async {
@@ -133,19 +155,6 @@ final class PaywallModel {
         self.alert = nil
     }
 
-    func productsLoaded(_ loaded: [PaywallProduct], canMakePayments: Bool) {
-        self.products = PaywallPlan.allCases.compactMap { plan in
-            loaded.first { $0.plan == plan }
-        }
-        self.canMakePayments = canMakePayments
-        self.hasLoadedProducts = true
-        if self.product(for: self.selectedPlan) == nil,
-           let fallback = self.product(for: .yearly)?.plan ?? self.products.first?.plan
-        {
-            self.selectedPlan = fallback
-        }
-    }
-
     func entitlementGranted() {
         guard !self.isPurchasing, !self.isRestoring else { return }
         self.finishPurchase()
@@ -171,7 +180,7 @@ final class PaywallModel {
             self.isPurchasePending = true
         }
         if case .paymentsNotAllowed = error as? PaywallError {
-            self.canMakePayments = false
+            self.paymentsRefused = true
         }
         self.alert = Self.alert(for: error)
     }
@@ -199,7 +208,7 @@ final class PaywallModel {
 
     private func loadProducts(forceRefresh: Bool) async {
         await self.service.loadProducts(forceRefresh: forceRefresh)
-        self.productsLoaded(self.service.products, canMakePayments: self.service.canMakePayments)
+        self.hasLoadedProducts = true
     }
 
     private func observeEntitlement() {

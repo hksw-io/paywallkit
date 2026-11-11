@@ -8,6 +8,7 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ### Changed
 
+- The paywall reads `products` and `canMakePayments` from the service on every update instead of copying them when `loadProducts` returns. Plans the service already holds are on screen in the first frame with the purchase button enabled, and a later change to `products` updates the open paywall. The loading placeholder shows only while the service has no plans and the first load has not returned. Keep both properties on the `@Observable` type.
 - The sheet cannot be swiped away while a purchase runs. Apps no longer need their own `interactiveDismissDisabled` for that.
 
 ### Fixed

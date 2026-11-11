@@ -165,10 +165,16 @@ once. A change from `.free` to `.entitled` while it is open plays the celebratio
 `.unknown` straight to `.entitled` closes it without one, so settle `.unknown` to `.free` before
 presenting.
 
+The paywall reads `products` and `canMakePayments` straight from the service, so keep them on the
+`@Observable` type too. Plans the service already holds are on screen in the first frame with the
+purchase button enabled, so load them at launch if you can; a later change to `products` updates
+the open paywall. The loading placeholder shows only while `products` is empty and the first load
+has not returned.
+
 The kit calls `loadProducts(forceRefresh: false)` when it appears and `forceRefresh: true` from Try
-Again, then reads `products` and `canMakePayments`. An empty `products` shows
-`.plansUnavailableTitle`; `canMakePayments == false` shows `.paymentsUnavailableTitle`. Plans render
-in monthly, yearly, lifetime order, with yearly selected first when it is offered.
+Again. Once a load has returned, an empty `products` shows `.plansUnavailableTitle`;
+`canMakePayments == false` shows `.paymentsUnavailableTitle`. Plans render in monthly, yearly,
+lifetime order, with yearly selected first when it is offered.
 
 A minimal StoreKit 2 conformance:
 
