@@ -31,7 +31,8 @@ final class PaywallModel {
     var alert: Alert?
     var shouldDismiss = false
     var isThanking = false
-    var hasLoadedProducts = false
+    /// The first load has not returned, or a retry is running.
+    private(set) var isLoading = true
     /// A purchase reported `.paymentsNotAllowed` although the service allowed payments.
     private var paymentsRefused = false
 
@@ -73,7 +74,7 @@ final class PaywallModel {
     }
 
     var isLoadingProducts: Bool {
-        !self.hasLoadedProducts && self.products.isEmpty
+        self.isLoading && self.products.isEmpty
     }
 
     var canPurchase: Bool {
@@ -120,6 +121,8 @@ final class PaywallModel {
     }
 
     func retryLoadProducts() async {
+        guard !self.isLoading else { return }
+        self.isLoading = true
         await self.loadProducts(forceRefresh: true)
     }
 
@@ -208,7 +211,7 @@ final class PaywallModel {
 
     private func loadProducts(forceRefresh: Bool) async {
         await self.service.loadProducts(forceRefresh: forceRefresh)
-        self.hasLoadedProducts = true
+        self.isLoading = false
     }
 
     private func observeEntitlement() {

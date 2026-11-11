@@ -18,6 +18,9 @@ final class FakePaywallService: PaywallService {
     var restoreError: Error?
     var entitlementAfterRestore: PaywallEntitlement?
     var loadProductsCallCount = 0
+    /// Holds `loadProducts` open until the test resumes `pendingLoad`.
+    var suspendsLoad = false
+    var pendingLoad: CheckedContinuation<Void, Never>?
     var restoreCallCount = 0
     var purchasedPlans: [PaywallPlan] = []
 
@@ -31,6 +34,9 @@ final class FakePaywallService: PaywallService {
 
     func loadProducts(forceRefresh _: Bool) async {
         self.loadProductsCallCount += 1
+        if self.suspendsLoad {
+            await withCheckedContinuation { self.pendingLoad = $0 }
+        }
         if let loaded = self.productsAfterLoad {
             self.productsToReturn = loaded
         }
@@ -267,7 +273,7 @@ struct PaywallModelTests {
         let model = self.makeModel(service: service, purchasable: false)
 
         await model.appear()
-        #expect(model.hasLoadedProducts)
+        #expect(!model.isLoadingProducts)
         #expect(model.productsUnavailable)
         #expect(!model.canPurchase)
 
@@ -277,6 +283,31 @@ struct PaywallModelTests {
 
         #expect(model.products == [yearly])
         #expect(!model.productsUnavailable)
+        #expect(model.canPurchase)
+        #expect(service.loadProductsCallCount == 2)
+        model.disappear()
+    }
+
+    @Test
+    func `a retry shows the placeholder and ignores further taps until it ends`() async {
+        let service = FakePaywallService()
+        let model = self.makeModel(service: service, purchasable: false)
+        await model.appear()
+        #expect(model.productsUnavailable)
+
+        service.suspendsLoad = true
+        service.productsAfterLoad = [Self.product(.yearly)]
+        let retry = Task { await model.retryLoadProducts() }
+        await self.settle { service.pendingLoad != nil }
+        #expect(model.isLoadingProducts)
+        #expect(!model.productsUnavailable)
+
+        await model.retryLoadProducts()
+        #expect(service.loadProductsCallCount == 2)
+
+        service.pendingLoad?.resume()
+        await retry.value
+        #expect(!model.isLoadingProducts)
         #expect(model.canPurchase)
         #expect(service.loadProductsCallCount == 2)
         model.disappear()

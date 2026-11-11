@@ -172,7 +172,8 @@ the open paywall. The loading placeholder shows only while `products` is empty a
 has not returned.
 
 The kit calls `loadProducts(forceRefresh: false)` when it appears and `forceRefresh: true` from Try
-Again. Once a load has returned, an empty `products` shows `.plansUnavailableTitle`;
+Again, which shows the placeholder again until the load returns. Once a load has returned, an
+empty `products` shows `.plansUnavailableTitle`;
 `canMakePayments == false` shows `.paymentsUnavailableTitle`. Plans render in monthly, yearly,
 lifetime order, with yearly selected first when it is offered.
 
