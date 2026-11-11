@@ -103,7 +103,13 @@ public struct PaywallView: View {
             .presentationDetents([.large])
             .presentationSizing(.form.fitted(horizontal: false, vertical: true))
         #endif
-            .interactiveDismissDisabled(self.model.isPurchasing)
+            // Only while purchasing, and from a leaf: an unconditional `interactiveDismissDisabled(false)`
+            // would override the presenter's own lock, such as UIKit's `isModalInPresentation`.
+            .background {
+                if self.model.isPurchasing {
+                    Color.clear.interactiveDismissDisabled()
+                }
+            }
             .onChange(of: self.reduceMotion, initial: true) { _, reduceMotion in
                 self.model.reduceMotion = reduceMotion
             }
@@ -173,6 +179,8 @@ public struct PaywallView: View {
                 }
             }
             .scrollBounceBehavior(.basedOnSize)
+            // Open at the plans, so the price and the trial terms are on screen beside the button.
+            .defaultScrollAnchor(.bottom, for: .initialOffset)
             // The purchase button stays on screen; its caption and the links scroll with the rest.
             .safeAreaBar(edge: .bottom) {
                 PaywallPurchaseButton(model: self.model)

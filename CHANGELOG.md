@@ -19,12 +19,12 @@ All notable changes to PaywallKit are recorded here. The format follows
 - CI tests with Xcode 27.0 only. Builds with Xcode 26.6 are no longer checked.
 - The purchase button's label, spinner and checkmark cross-fade directly with the purchase state. A purchase that finishes at once no longer waits for the label to fade before the checkmark appears.
 - The sparkles around the hero icon keep the same positions every time instead of random ones, and are drawn in the first frame.
-- The sheet cannot be swiped away while a purchase runs. Apps no longer need their own `interactiveDismissDisabled` for that.
+- The sheet cannot be swiped away while a purchase runs. Apps no longer need their own `interactiveDismissDisabled` for that. Outside a purchase the presenter's own setting, such as UIKit's `isModalInPresentation` or an `interactiveDismissDisabled` around the paywall, stays in charge.
 
 ### Fixed
 
 - The caption under the purchase button was cut off after two lines, which could truncate the trial disclosure in longer translations. It still reserves two lines and now grows past them.
-- At accessibility text sizes the purchase button scrolled with the content and started below the fold. It now stays pinned at the bottom; its caption and the footer links scroll.
+- At accessibility text sizes the purchase button scrolled with the content and started below the fold. It now stays pinned at the bottom; its caption and the footer links scroll, and the sheet opens scrolled to the plans so the price and the trial terms show beside the button.
 - Try Again gave no sign that plans were reloading. It now shows the loading placeholder until the load returns, and further taps are ignored meanwhile.
 - The yearly savings badge could show one percent too little: monthly 10 and yearly 85.20 showed 28% for an exact 29%. The percentage is now rounded down in `Decimal`.
 - The backdrop glow ignored `brand` and `brandLight` and was always the accent colour and blue. It now uses the brand colours, which default to the accent colour.
