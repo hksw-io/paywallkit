@@ -26,7 +26,7 @@ Instructions for agents working in this repository. RFC 2119 keywords apply.
 - Add or update Swift Testing coverage for every behavior change. `PaywallModelTests` drives the model with an `@Observable` fake service and a recorded `sleep`.
 - Tests MUST compare `PaywallString` values, or pass `{ "\($0)" }` as the lookup, never English literals.
 - Run `swift test` and `xcodebuild -scheme PaywallKit -destination 'generic/platform=iOS Simulator' build` before calling work complete, and `git diff --check` before committing.
-- CI (`.github/workflows/ci.yml`) runs macOS and iOS Simulator tests on Xcode 26.6 and 27.0. Keep it green.
+- CI (`.github/workflows/ci.yml`) runs macOS and iOS Simulator tests on Xcode 27.0. Keep it green.
 
 ## Documentation and Releases
 
