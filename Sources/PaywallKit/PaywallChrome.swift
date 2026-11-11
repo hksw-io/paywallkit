@@ -335,7 +335,8 @@ struct PaywallFooterDetails: View {
         if self.dynamicTypeSize.isAccessibilitySize {
             copy
         } else {
-            copy.lineLimit(2, reservesSpace: true)
+            // Two lines are reserved so the sheet keeps its height; a longer disclosure grows.
+            copy.lineLimit(2...)
         }
     }
 }

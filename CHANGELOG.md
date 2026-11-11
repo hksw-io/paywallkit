@@ -13,6 +13,7 @@ All notable changes to PaywallKit are recorded here. The format follows
 
 ### Fixed
 
+- The caption under the purchase button was cut off after two lines, which could truncate the trial disclosure in longer translations. It still reserves two lines and now grows past them.
 - At accessibility text sizes the purchase button scrolled with the content and started below the fold. It now stays pinned at the bottom; its caption and the footer links scroll.
 - Try Again gave no sign that plans were reloading. It now shows the loading placeholder until the load returns, and further taps are ignored meanwhile.
 - The yearly savings badge could show one percent too little: monthly 10 and yearly 85.20 showed 28% for an exact 29%. The percentage is now rounded down in `Decimal`.
