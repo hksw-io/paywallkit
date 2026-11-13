@@ -33,4 +33,5 @@ Instructions for agents working in this repository. RFC 2119 keywords apply.
 - Keep README examples compiling against the public API.
 - Record every public API or behavior change under `## [Unreleased]` in `CHANGELOG.md`.
 - Releases are annotated SemVer tags without a `v` prefix (`1.0.1`). Never move a published tag.
+- A minor release may contain a breaking change, marked **Breaking** in `CHANGELOG.md`, so consumers pin exact versions.
 - Use semantic commit messages: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`, `ci:`.

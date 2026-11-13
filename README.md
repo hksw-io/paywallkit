@@ -45,10 +45,13 @@ Not Now.
 ## Installation
 
 ```swift
-.package(url: "https://github.com/hksw-io/paywallkit.git", from: "1.4.0")
+.package(url: "https://github.com/hksw-io/paywallkit.git", exact: "1.4.0")
 ```
 
-Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and choose **Up to Next Major Version** from `1.4.0`.
+Or in Xcode: **File > Add Package Dependencies**, enter the URL above, and choose **Exact Version** `1.4.0`.
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed between releases. A minor release may contain a
+breaking change, marked **Breaking** there, so pin an exact version.
 
 ## Usage
 
@@ -99,9 +102,8 @@ While a purchase runs the sheet cannot be swiped away. On Mac, Return presses th
 
 The kit ships no strings. `strings` returns your app's text for every `PaywallString`, so the
 paywall names your subscription and localizes with the rest of your app. An exhaustive `switch`
-makes the compiler flag any case you miss, including cases a minor release adds (1.2.0 added
-`.benefitsSubtitle`). Keep the function `nonisolated`: the parameter is `@Sendable`, and new Xcode app
-targets default to main-actor isolation. This English copy is a starting point:
+makes the compiler flag any case you miss, including cases a later release adds. Keep the function
+`nonisolated`: the parameter is `@Sendable`, and new Xcode app targets default to main-actor isolation. This English copy is a starting point:
 
 ```swift
 import PaywallKit
