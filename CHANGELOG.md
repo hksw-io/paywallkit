@@ -1,8 +1,8 @@
 # Changelog
 
 All notable changes to PaywallKit are recorded here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
-[semantic versioning](https://semver.org/spec/v2.0.0.html).
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions are plain tags, and a minor release
+may contain a breaking change, marked **Breaking**, so pin an exact version.
 
 ## [Unreleased]
 
