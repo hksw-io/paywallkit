@@ -1,16 +1,16 @@
 # AGENTS.md
 
-Instructions for agents working in this repository. RFC 2119 keywords apply.
+Instructions for agents working in this repository.
 
 ## Package Scope
 
 - This is a Swift package for a reusable SwiftUI paywall. The supported product surfaces are iOS 26+ and macOS 26+.
-- watchOS is out of scope unless the user explicitly asks for it. Every source file MUST stay wrapped in `#if os(iOS) || os(macOS)`: consumers link the package into frameworks that also build for watchOS.
+- watchOS is out of scope unless the user explicitly asks for it. Every source file must stay wrapped in `#if os(iOS) || os(macOS)`: consumers link the package into frameworks that also build for watchOS.
 - The kit owns the purchase flow (`PaywallModel`). The consuming app owns StoreKit, entitlement policy and persistence behind `PaywallService`. Do not move app policy into the kit unless the public API is explicitly changed.
 
 ## SwiftUI Standards
 
-- Use pure SwiftUI. Do not use deprecated APIs such as `foregroundColor`, old `alert` overloads, or `animation(_:)` without `value:`.
+- Use pure SwiftUI.
 - Preserve accessibility in every UI change: VoiceOver labels and grouping, Dynamic Type (accessibility sizes switch to the scrolling layout), Reduce Motion, contrast, and light and dark mode.
 - Reduce Motion removes decorative motion, turns causal motion into an instant crossfade, and keeps every haptic. `animatesDecorations` gates only the ambient loops.
 - Keep `.accessibilityIdentifier("paywall.sheet")`. Consumers' UI tests find the sheet by it.
@@ -18,13 +18,13 @@ Instructions for agents working in this repository. RFC 2119 keywords apply.
 
 ## Localization
 
-- The kit ships no copy. Every user-visible or spoken string MUST come from a `PaywallString` case through the app's lookup (`@Environment(\.paywallStrings)` in views; `PaywallString` values in the model). Never write a literal in `Text`, a label, a hint or an alert.
+- The kit ships no copy. Every user-visible or spoken string must come from a `PaywallString` case through the app's lookup (`@Environment(\.paywallStrings)` in views; `PaywallString` values in the model). Never write a literal in `Text`, a label, a hint or an alert.
 - New copy is a new `PaywallString` case, which is a breaking change: apps switch over the enum exhaustively. Update the README's reference `switch` with it.
 
 ## Testing and Verification
 
 - Add or update Swift Testing coverage for every behavior change. `PaywallModelTests` drives the model with an `@Observable` fake service and a recorded `sleep`.
-- Tests MUST compare `PaywallString` values, or pass `{ "\($0)" }` as the lookup, never English literals.
+- Tests must compare `PaywallString` values, or pass `{ "\($0)" }` as the lookup, never English literals.
 - Run `swift test` and `xcodebuild -scheme PaywallKit -destination 'generic/platform=iOS Simulator' build` before calling work complete, and `git diff --check` before committing.
 - CI (`.github/workflows/ci.yml`) runs macOS and iOS Simulator tests on Xcode 27.0. Keep it green.
 
